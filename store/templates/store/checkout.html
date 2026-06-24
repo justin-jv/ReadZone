@@ -1,0 +1,1168 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+:root{
+--checkout-card:rgba(255,255,255,.72);
+--checkout-border:rgba(31,45,40,.08);
+--checkout-primary:#23473b;
+--checkout-accent:#c49a5a;
+}
+
+.checkout-card{
+background:var(--checkout-card);
+backdrop-filter:blur(18px);
+border:1px solid var(--checkout-border);
+border-radius:28px;
+box-shadow:0 12px 35px rgba(0,0,0,.05);
+transition:.3s;
+}
+.checkout-card:hover{transform:translateY(-2px);}
+
+.checkout-title{
+font-weight:700;
+color:var(--checkout-primary);
+}
+
+.address-badge{
+background:var(--checkout-primary)!important;
+padding:.55rem .9rem;
+border-radius:999px;
+}
+
+.change-btn,.place-btn{
+border:none;
+border-radius:999px;
+padding:.85rem 1.4rem;
+font-weight:600;
+}
+
+.change-btn{
+background:rgba(35,71,59,.1);
+color:var(--checkout-primary);
+}
+
+.place-btn{
+background:linear-gradient(135deg,#23473b,#3f6f5d);
+color:#fff;
+width:100%;
+}
+
+.book-image{
+height:120px;
+width:100%;
+object-fit:cover;
+border-radius:18px;
+}
+
+.delivery-fast{
+background:#dcfce7;
+color:#166534;
+padding:.45rem .8rem;
+border-radius:999px;
+font-weight:600;
+}
+
+.delivery-standard{
+background:#dbeafe;
+color:#1d4ed8;
+padding:.45rem .8rem;
+border-radius:999px;
+font-weight:600;
+}
+
+.summary-card{
+position:sticky;
+top:100px;
+}
+
+.address-option-wrap{
+padding:14px;
+border:1px solid var(--checkout-border);
+border-radius:16px;
+margin-bottom:12px;
+background:rgba(255,255,255,.5);
+}
+
+.modal-content{
+border:none;
+border-radius:24px;
+}
+
+@media(max-width:991px){
+.summary-card{position:relative;top:auto;}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+<div class="row g-4">
+
+<div class="col-lg-8">
+
+<div class="checkout-card p-4 mb-4">
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+<div>
+<div class="d-flex align-items-center mb-3">
+
+<h5 class="checkout-title mb-0">Delivery Address</h5>
+
+<span id="addressLabel" class="badge address-badge ms-3">
+{{ default_address.address_label }}
+</span>
+
+</div>
+
+<div id="deliveryAddressCard">
+
+<strong id="addressFullName">{{ default_address.full_name }}</strong><br>
+
+<span id="addressHouseName">{{ default_address.house_name }}</span><br>
+
+<span id="addressAreaStreet">{{ default_address.area_street }}</span><br>
+
+<span id="addressCityDistrict">{{ default_address.city }}, {{ default_address.district }}</span><br>
+
+<span id="addressStatePincode">{{ default_address.state }} - {{ default_address.pincode }}</span><br>
+
+Mobile:
+<span id="addressMobile">{{ default_address.mobile_number }}</span>
+
+</div>
+
+<a href="{% url 'add_address' %}?next={{ request.path }}" class="btn btn-sm btn-success">Add New Address</a>
+</div>
+
+<button type="button"
+class="change-btn"
+data-bs-toggle="modal"
+data-bs-target="#addressModal">
+Change Address
+</button>
+
+</div>
+</div>
+
+<form method="post" action="{% url 'place_order' %}" id="checkoutForm">
+{% csrf_token %}
+
+<input type="hidden"
+name="address_id"
+id="selected_address_id"
+value="{{ default_address.id }}">
+
+{% for item in items %}
+
+<div class="checkout-card p-4 mb-3">
+
+<div class="row align-items-center g-3">
+
+<div class="col-md-2">
+{% if item.product.cover_image %}
+<img src="{{ item.product.cover_image.url }}" class="book-image">
+{% endif %}
+</div>
+
+<div class="col-md-6">
+<h5>{{ item.product.title }}</h5>
+<p class="text-muted mb-1">{{ item.product.author }}</p>
+<strong>₹{{ item.product.effective_price }}</strong>
+<div class="small mt-2">Quantity: {{ item.quantity }}</div>
+</div>
+
+<div class="col-md-4 text-md-end">
+
+{% if item.product.effective_price >= 500 %}
+<span class="delivery-fast">Fast Delivery</span>
+<p class="mt-2 mb-0">Delivery in 2 days</p>
+{% else %}
+<span class="delivery-standard">Standard Delivery</span>
+<p class="mt-2 mb-0">Delivery in 6 days</p>
+{% endif %}
+
+</div>
+
+</div>
+</div>
+
+{% endfor %}
+
+
+<div class="checkout-card p-4">
+
+    <h5 class="checkout-title">
+        Payment Method
+    </h5>
+
+    <div class="form-check mt-3">
+
+        <input
+            class="form-check-input"
+            type="radio"
+            name="payment_method"
+            value="cod"
+            id="cod"
+            checked
+        >
+
+        <label
+            class="form-check-label"
+            for="cod"
+        >
+            Cash on Delivery
+        </label>
+
+    </div>
+
+    <div class="form-check mt-2">
+
+        <input
+            class="form-check-input"
+            type="radio"
+            name="payment_method"
+            value="wallet"
+            id="wallet"
+        >
+
+        <label
+            class="form-check-label"
+            for="wallet"
+        >
+            Wallet
+            (Balance: ₹{{ wallet.balance }})
+        </label>
+
+    </div>
+
+    <div class="form-check mt-2">
+
+        <input
+            class="form-check-input"
+            type="radio"
+            name="payment_method"
+            value="online"
+            id="online"
+        >
+
+        <label
+            class="form-check-label"
+            for="online"
+        >
+            Online Payment
+            (Razorpay)
+        </label>
+
+    </div>
+
+    <button
+        type="submit"
+        class="place-btn mt-4"
+        id="placeOrderBtn"
+    >
+        Place Order
+    </button>
+
+</div>
+
+
+</form>
+
+</div>
+
+
+<div class="col-lg-4">    
+
+<div class="checkout-card p-4 summary-card">
+
+
+<h5 class="checkout-title mb-4">Price Details</h5>
+
+<div class="mb-3">
+
+{% for item in items %}
+
+<div class="d-flex justify-content-between mb-2">
+<span>{{ item.product.title|truncatechars:20 }}</span>
+<span>₹{{ item.subtotal }}</span>
+</div>
+
+{% endfor %}
+
+</div>
+
+<hr>
+
+<div class="d-flex justify-content-between mb-2">
+<span>Subtotal</span>
+<span>₹{{ subtotal }}</span>
+</div>
+
+<div class="d-flex justify-content-between mb-2">
+<span>Shipping</span>
+<span>₹{{ shipping_charge }}</span>
+</div>
+
+<div class="d-flex justify-content-between mb-2">
+<span>Tax</span>
+<span>₹{{ tax_amount }}</span>
+</div>
+
+<hr>
+
+{% if coupon %}
+
+<div class="alert alert-success">
+
+    <strong>
+        Coupon Applied:
+    </strong>
+
+    {{ coupon.code }}
+
+    <br>
+
+    Discount:
+
+    ₹{{ coupon_discount }}
+
+</div>
+
+<a
+    href="{% url 'remove_coupon' %}"
+    class="btn btn-danger btn-sm"
+>
+
+    Remove Coupon
+
+</a>
+
+{% else %}
+
+<button
+    type="button"
+    class="btn btn-dark"
+    data-bs-toggle="modal"
+    data-bs-target="#couponModal"
+>
+
+    View Available Coupons
+
+</button>
+
+{% endif %}
+
+
+<div class="d-flex justify-content-between mb-2">
+
+    <span>
+        Offer Savings
+    </span>
+
+    <span class="text-success">
+
+        - ₹{{ offer_discount|default:"0" }}
+
+    </span>
+
+</div>
+
+<div class="d-flex justify-content-between mb-2">
+
+    <span>
+        Coupon Savings
+    </span>
+
+    <span class="text-success">
+
+        - ₹{{ coupon_discount }}
+
+    </span>
+
+</div>
+
+<hr>
+
+<div class="d-flex justify-content-between fs-5 fw-bold">
+
+    <span>
+
+        Total
+
+    </span>
+
+    <span>
+
+        ₹{{ grand_total }}
+
+    </span>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+<div class="modal fade" id="addressModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content">
+
+<div class="modal-header">
+<h5 class="modal-title">Select Delivery Address</h5>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+
+{% for address in addresses %}
+
+<div class="address-option-wrap">
+
+<div class="form-check">
+
+<input
+class="form-check-input address-option"
+type="radio"
+name="modal_address"
+value="{{ address.id }}"
+data-label="{{ address.address_label }}"
+data-full-name="{{ address.full_name }}"
+data-house-name="{{ address.house_name }}"
+data-area-street="{{ address.area_street }}"
+data-city="{{ address.city }}"
+data-district="{{ address.district }}"
+data-state="{{ address.state }}"
+data-pincode="{{ address.pincode }}"
+data-mobile="{{ address.mobile_number }}"
+{% if address.id == default_address.id %}checked{% endif %}>
+
+<label class="form-check-label">
+<strong>{{ address.address_label }}</strong><br>
+{{ address.full_name }}<br>
+{{ address.city }} - {{ address.pincode }}
+</label>
+
+</div>
+
+</div>
+
+
+{% endfor %}
+
+</div>
+
+<div class="modal-footer">
+<button type="button"
+class="place-btn"
+id="confirmAddress"
+data-bs-dismiss="modal">
+Confirm Address
+</button>
+</div>
+
+</div>
+</div>
+</div>
+
+<div
+    class="modal fade"
+    id="couponModal"
+    tabindex="-1"
+>
+
+    <div class="modal-dialog modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+
+                    Available Coupons
+
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                ></button>
+
+            </div>
+
+            <div class="modal-body">
+
+                {% for coupon in available_coupons %}
+
+                <div class="border rounded p-3 mb-3">
+
+                    <h5>
+
+                        {{ coupon.code }}
+
+                    </h5>
+
+                    <p class="mb-1">
+
+                        ₹{{ coupon.discount_amount }}
+                        OFF
+
+                    </p>
+
+                    <p class="mb-2">
+
+                        Minimum Purchase:
+
+                        ₹{{ coupon.minimum_purchase_amount }}
+
+                    </p>
+
+                    <a
+                        href="{% url 'apply_coupon' coupon.id %}"
+                        class="btn btn-success btn-sm"
+                    >
+
+                        Apply Coupon
+
+                    </a>
+
+                </div>
+
+                {% empty %}
+
+                <p>
+
+                    No coupons available.
+
+                </p>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+document
+.getElementById('confirmAddress')
+.addEventListener('click',function(){
+
+const selected=document.querySelector('.address-option:checked');
+
+document.getElementById('selected_address_id').value=selected.value;
+document.getElementById('addressLabel').textContent=selected.dataset.label;
+document.getElementById('addressFullName').textContent=selected.dataset.fullName;
+document.getElementById('addressHouseName').textContent=selected.dataset.houseName;
+document.getElementById('addressAreaStreet').textContent=selected.dataset.areaStreet;
+document.getElementById('addressCityDistrict').textContent=selected.dataset.city+', '+selected.dataset.district;
+document.getElementById('addressStatePincode').textContent=selected.dataset.state+' - '+selected.dataset.pincode;
+document.getElementById('addressMobile').textContent=selected.dataset.mobile;
+});
+document
+.getElementById(
+    'checkoutForm'
+)
+.addEventListener(
+    'submit',
+    function(e){
+
+        const paymentMethod =
+            document.querySelector(
+                'input[name="payment_method"]:checked'
+            ).value;
+
+        if(
+            paymentMethod !== 'online'
+        ){
+            return;
+        }
+
+        e.preventDefault();
+
+        const formData =
+            new FormData(this);
+
+        fetch(
+            "{% url 'create_razorpay_order' %}",
+            {
+                method:'POST',
+                headers:{
+                    'X-CSRFToken':
+                    '{{ csrf_token }}'
+                },
+                body:formData
+            }
+        )
+        .then(
+            response =>
+            response.json()
+        )
+        .then(
+            data => {
+
+                const options = {
+
+                    key:data.key,
+
+                    amount:data.amount,
+
+                    currency:'INR',
+
+                    order_id:data.order_id,
+
+                    name:'ReadZone',
+
+                    description:'Book Purchase',
+
+                    handler:function(response){
+
+                        window.location.href =
+                        `/verify-razorpay-payment/?razorpay_payment_id=${response.razorpay_payment_id}&razorpay_order_id=${response.razorpay_order_id}&razorpay_signature=${response.razorpay_signature}`;
+
+                    }
+
+                };
+
+                const rzp =
+                    new Razorpay(
+                        options
+                    );
+
+                rzp.open();
+
+            }
+        );
+
+    }
+);
+
+</script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+{% endblock %}
+
+
+{% comment %} Original {% endcomment %}
+
+{% comment %} {% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="row">
+
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm mb-4">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-start">
+
+                        <div>
+
+                            <div class="d-flex align-items-center mb-3">
+
+                                <h5 class="mb-0">
+                                    Delivery Address
+                                </h5>
+
+                                <span
+                                    id="addressLabel"
+                                    class="badge bg-dark ms-3"
+                                >
+                                    {{ default_address.address_label }}
+                                </span>
+
+                            </div>
+
+                            <div id="deliveryAddressCard">
+
+                                <strong id="addressFullName">
+
+                                    {{ default_address.full_name }}
+
+                                </strong>
+
+                                <br>
+
+                                <span id="addressHouseName">
+
+                                    {{ default_address.house_name }}
+
+                                </span>
+
+                                <br>
+
+                                <span id="addressAreaStreet">
+
+                                    {{ default_address.area_street }}
+
+                                </span>
+
+                                <br>
+
+                                <span id="addressCityDistrict">
+
+                                    {{ default_address.city }},
+                                    {{ default_address.district }}
+
+                                </span>
+
+                                <br>
+
+                                <span id="addressStatePincode">
+
+                                    {{ default_address.state }}
+                                    -
+                                    {{ default_address.pincode }}
+
+                                </span>
+
+                                <br>
+
+                                Mobile:
+
+                                <span id="addressMobile">
+
+                                    {{ default_address.mobile_number }}
+
+                                </span>
+
+                            </div>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-dark btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#addressModal"
+                        >
+                            Change
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <form
+                method="post"
+                action="{% url 'place_order' %}"
+            >
+
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="address_id"
+                    id="selected_address_id"
+                    value="{{ default_address.id }}"
+                >
+
+                {% for item in items %}
+
+                <div class="card shadow-sm mb-3">
+
+                    <div class="card-body">
+
+                        <div class="row align-items-center">
+
+                            <div class="col-md-2">
+
+                                {% if item.product.cover_image %}
+
+                                <img
+                                    src="{{ item.product.cover_image.url }}"
+                                    class="img-fluid rounded"
+                                    style="
+                                        height:120px;
+                                        object-fit:cover;
+                                    "
+                                >
+
+                                {% endif %}
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <h5>
+                                    {{ item.product.title }}
+                                </h5>
+
+                                <p class="text-muted mb-1">
+                                    {{ item.product.author }}
+                                </p>
+
+                                <strong>
+                                    ₹{{ item.product.effective_price }}
+                                </strong>
+
+                                <br>
+
+                                Quantity:
+                                {{ item.quantity }}
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                {% if item.product.effective_price >= 500 %}
+
+                                    <span class="badge bg-success">
+
+                                        Fast Delivery
+
+                                    </span>
+
+                                    <p class="mt-2 mb-0">
+
+                                        Delivery in 2 days
+
+                                    </p>
+
+                                {% else %}
+
+                                    <span class="badge bg-primary">
+
+                                        Standard Delivery
+
+                                    </span>
+
+                                    <p class="mt-2 mb-0">
+
+                                        Delivery in 6 days
+
+                                    </p>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+                <div class="card shadow-sm">
+
+                    <div class="card-body">
+
+                        <h5>
+                            Payment Method
+                        </h5>
+
+                        <div class="form-check">
+
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                checked
+                                disabled
+                            >
+
+                            <label class="form-check-label">
+
+                                Cash on Delivery
+
+                            </label>
+
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="btn btn-dark mt-4"
+                        >
+
+                            Place Order
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="card shadow-sm sticky-top">
+
+                <div class="card-body">
+
+                    <h5 class="mb-4">
+                        Price Details
+                    </h5>
+
+                    <div class="mb-3">
+
+                        {% for item in items %}
+
+                        <div class="d-flex justify-content-between">
+
+                            <span>
+
+                                {{ item.product.title|truncatechars:20 }}
+
+                            </span>
+
+                            <span>
+
+                                ₹{{ item.subtotal }}
+
+                            </span>
+
+                        </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+
+                        <span>
+                            Subtotal
+                        </span>
+
+                        <span>
+                            ₹{{ subtotal }}
+                        </span>
+
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+
+                        <span>
+                            Shipping
+                        </span>
+
+                        <span>
+                            ₹{{ shipping_charge }}
+                        </span>
+
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+
+                        <span>
+                            Tax
+                        </span>
+
+                        <span>
+                            ₹{{ tax_amount }}
+                        </span>
+
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+
+                        <strong>Total</strong>
+
+                        <strong>
+
+                            ₹{{ grand_total }}
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div
+    class="modal fade"
+    id="addressModal"
+    tabindex="-1"
+>
+
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+
+                    Select Delivery Address
+
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                ></button>
+
+            </div>
+
+            <div class="modal-body">
+
+                {% for address in addresses %}
+
+                <div class="form-check mb-3">
+                    
+                    <input
+                        class="form-check-input address-option"
+                        type="radio"
+                        name="modal_address"
+                        value="{{ address.id }}"
+
+                        data-label="{{ address.address_label }}"
+                        data-full-name="{{ address.full_name }}"
+                        data-house-name="{{ address.house_name }}"
+                        data-area-street="{{ address.area_street }}"
+                        data-city="{{ address.city }}"
+                        data-district="{{ address.district }}"
+                        data-state="{{ address.state }}"
+                        data-pincode="{{ address.pincode }}"
+                        data-mobile="{{ address.mobile_number }}"
+
+                        {% if address.id == default_address.id %}
+                        checked
+                        {% endif %}
+                    >
+
+                    <label class="form-check-label">
+
+                        <strong>
+
+                            {{ address.address_label }}
+
+                        </strong>
+
+                        <br>
+
+                        {{ address.full_name }}
+
+                        <br>
+
+                        {{ address.city }}
+
+                        -
+                        {{ address.pincode }}
+
+                    </label>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-dark"
+                    id="confirmAddress"
+                    data-bs-dismiss="modal"
+                >
+
+                    Confirm
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+document
+.getElementById(
+    'confirmAddress'
+)
+.addEventListener(
+    'click',
+    function () {
+
+        const selected =
+            document.querySelector(
+                '.address-option:checked'
+            );
+
+        document.getElementById(
+            'selected_address_id'
+        ).value =
+            selected.value;
+
+        document.getElementById(
+            'addressLabel'
+        ).textContent =
+            selected.dataset.label;
+
+        document.getElementById(
+            'addressFullName'
+        ).textContent =
+            selected.dataset.fullName;
+
+        document.getElementById(
+            'addressHouseName'
+        ).textContent =
+            selected.dataset.houseName;
+
+        document.getElementById(
+            'addressAreaStreet'
+        ).textContent =
+            selected.dataset.areaStreet;
+
+        document.getElementById(
+            'addressCityDistrict'
+        ).textContent =
+            selected.dataset.city +
+            ', ' +
+            selected.dataset.district;
+
+        document.getElementById(
+            'addressStatePincode'
+        ).textContent =
+            selected.dataset.state +
+            ' - ' +
+            selected.dataset.pincode;
+
+        document.getElementById(
+            'addressMobile'
+        ).textContent =
+            selected.dataset.mobile;
+
+    }
+);
+
+</script>
+{% endblock %} {% endcomment %}

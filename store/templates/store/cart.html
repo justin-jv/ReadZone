@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="row">
+
+        <div class="col-lg-8">
+
+            <h2 class="mb-4">
+
+                Shopping Cart
+
+            </h2>
+
+            {% if items %}
+
+                {% for item in items %}
+
+                <div class="card mb-3 shadow-sm">
+
+                    <div class="card-body">
+
+                        <div class="row align-items-center">
+
+                            <div class="col-md-2 text-center">
+
+                                {% if item.product.cover_image %}
+
+                                <img
+                                    src="{{ item.product.cover_image.url }}"
+                                    class="img-fluid rounded"
+                                    style="
+                                        height:120px;
+                                        object-fit:cover;
+                                    "
+                                >
+
+                                {% else %}
+
+                                <img
+                                    src="{% static 'store/images/book_placeholder.jpg' %}"
+                                    class="img-fluid rounded"
+                                    style="
+                                        height:120px;
+                                        object-fit:cover;
+                                    "
+                                >
+
+                                {% endif %}
+
+                            </div>
+
+                            <div class="col-md-4">
+
+                                <h5>
+
+                                    {{ item.product.title }}
+
+                                </h5>
+
+                                <p class="text-muted mb-1">
+
+                                    {{ item.product.author }}
+
+                                </p>
+
+                                <small>
+
+                                    ₹{{ item.product.effective_price }}
+
+                                </small>
+
+                            </div>
+
+                            <div class="col-md-3">
+
+                                <div
+                                    class="d-flex
+                                    align-items-center
+                                    justify-content-center"
+                                >
+
+                                    <a
+                                        href="{% url 'decrease_quantity' item.id %}"
+                                        class="btn btn-outline-secondary"
+                                    >
+                                        -
+                                    </a>
+
+                                    <span
+                                        class="mx-3 fw-bold"
+                                    >
+                                        {{ item.quantity }}
+                                    </span>
+
+                                    <a
+                                        href="{% url 'increase_quantity' item.id %}"
+                                        class="btn btn-outline-secondary"
+                                    >
+                                        +
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-2 text-center">
+
+                                <strong>
+
+                                    ₹{{ item.subtotal }}
+
+                                </strong>
+
+                            </div>
+
+                            <div class="col-md-1 text-center">
+
+                                <a
+                                    href="{% url 'remove_from_cart' item.id %}"
+                                    class="btn btn-danger btn-sm"
+                                >
+
+                                    <i class="fas fa-trash"></i>
+
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="text-center py-5">
+
+                    <h3>
+
+                        Your cart is empty
+
+                    </h3>
+
+                    <a
+                        href="{% url 'shop' %}"
+                        class="btn btn-dark mt-3"
+                    >
+
+                        Continue Shopping
+
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+        {% if items %}
+
+        <div class="col-lg-4">
+
+            <div class="card shadow-sm sticky-top">
+
+                <div class="card-body">
+
+                    <h4 class="mb-4">
+
+                        Order Summary
+
+                    </h4>
+
+                    <div
+                        class="d-flex
+                        justify-content-between
+                        mb-3"
+                    >
+
+                        <span>
+
+                            Total
+
+                        </span>
+
+                        <strong>
+
+                            ₹{{ total }}
+
+                        </strong>
+
+                    </div>
+
+                    <a
+                        href="{% url 'checkout' %}"
+                        class="btn btn-dark w-100"  
+                    >
+
+                        Proceed to Checkout
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

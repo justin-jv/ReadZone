@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2>
+
+            Coupon Management
+
+        </h2>
+
+        <a
+            href="{% url 'add_coupon' %}"
+            class="btn btn-dark"
+        >
+
+            Add Coupon
+
+        </a>
+
+    </div>
+
+    <div class="card">
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Code
+                            </th>
+
+                            <th>
+                                Discount
+                            </th>
+
+                            <th>
+                                Minimum Purchase
+                            </th>
+
+                            <th>
+                                Usage
+                            </th>
+
+                            <th>
+                                Valid Till
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for coupon in coupons %}
+
+                        <tr>
+
+                            <td>
+
+                                {{ coupon.code }}
+
+                            </td>
+
+                            <td>
+
+                                ₹{{ coupon.discount_amount }}
+
+                            </td>
+
+                            <td>
+
+                                ₹{{ coupon.minimum_purchase_amount }}
+
+                            </td>
+
+                            <td>
+
+                                {{ coupon.used_count }}
+
+                                /
+
+                                {{ coupon.max_usage }}
+
+                            </td>
+
+                            <td>
+
+                                {{ coupon.valid_to }}
+
+                            </td>
+
+                            <td>
+                                {% now "Y-m-d H:i:s" as current_time %}
+
+                                {% if not coupon.is_active %}
+
+                                <span class="badge bg-danger">
+                                    Inactive
+                                </span>
+
+                                {% elif coupon.used_count >= coupon.max_usage %}
+
+                                <span class="badge bg-warning text-dark">
+                                    Limit Reached
+                                </span>
+
+                                {% elif coupon.valid_to|date:"Y-m-d H:i:s" < current_time %}
+
+                                <span class="badge bg-danger">
+                                    Expired
+                                </span>
+
+                                {% elif coupon.valid_from|date:"Y-m-d H:i:s" > current_time %}
+
+                                <span class="badge bg-info">
+                                    Upcoming
+                                </span>
+
+                                {% else %}
+
+                                <span class="badge bg-success">
+                                    Active
+                                </span>
+
+                                {% endif %}
+                            </td>
+
+                            <td>
+
+                                <a
+                                    href="{% url 'delete_coupon' coupon.id %}"
+                                    class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Delete this coupon?')"
+                                >
+
+                                    Delete
+
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+
+                            <td
+                                colspan="7"
+                                class="text-center"
+                            >
+
+                                No coupons found.
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

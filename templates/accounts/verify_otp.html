@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-5">
+
+            <div class="card shadow border-0">
+
+                <div class="card-body p-4">
+
+                    <h2 class="text-center mb-3">
+                        Verify OTP
+                    </h2>
+
+                    <p class="text-center">
+                        Attempts Remaining:
+                        <strong>{{ remaining_attempts }}</strong>
+                    </p>
+
+                    <p
+                        id="timer"
+                        class="text-center text-danger fw-bold"
+                    ></p>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-warning">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="POST">
+
+                        {% csrf_token %}
+
+                        {{ form.as_p }}
+
+                        <button
+                            type="submit"
+                            id="verify-btn"
+                            class="btn btn-success w-100"
+                        >
+                            Verify OTP
+                        </button>
+
+                    </form>
+
+                    <div
+                        id="resend-container"
+                        class="text-center mt-3"
+                        style="display:none;"
+                    >
+
+                        <a
+                            href="{% url 'resend_otp' %}"
+                            class="btn btn-outline-primary"
+                        >
+                            Resend OTP
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

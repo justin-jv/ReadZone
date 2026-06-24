@@ -1,0 +1,870 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container py-5">
+
+```
+<div class="row justify-content-center">
+
+    <div class="col-xl-10 col-lg-11">
+
+        <div class="card shadow border-0">
+
+            <div class="card-header bg-success text-white">
+
+                <h3 class="mb-0">
+                    Add Product
+                </h3>
+
+            </div>
+
+            <div class="card-body">
+
+                {% if form.errors %}
+
+                    <div class="alert alert-danger">
+
+                        <h6 class="mb-2">
+                            Please correct the following errors:
+                        </h6>
+
+                        <ul class="mb-0">
+
+                            {% for field in form %}
+
+                                {% for error in field.errors %}
+
+                                    <li>
+                                        <strong>
+                                            {{ field.label }}
+                                        </strong>
+                                        :
+                                        {{ error }}
+                                    </li>
+
+                                {% endfor %}
+
+                            {% endfor %}
+
+                            {% for error in form.non_field_errors %}
+
+                                <li>
+                                    {{ error }}
+                                </li>
+
+                            {% endfor %}
+
+                        </ul>
+
+                    </div>
+
+                {% endif %}
+
+                <form
+                    method="POST"
+                    enctype="multipart/form-data"
+                >
+
+                    {% csrf_token %}
+
+                    <h5 class="mb-3">
+                        Product Information
+                    </h5>
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+                                Title
+                            </label>
+
+                            {{ form.title }}
+
+                            {% if form.title.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.title.errors.0 }}
+                                </div>
+                            {% endif %}
+
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+
+                            <label class="form-label">
+                                Category
+                            </label>
+
+                            {{ form.category }}
+
+                            {% if form.category.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.category.errors.0 }}
+                                </div>
+                            {% endif %}
+
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+
+                            <label class="form-label">
+                                Language
+                            </label>
+
+                            {{ form.language }}
+
+                            {% if form.language.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.language.errors.0 }}
+                                </div>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Author
+                            </label>
+
+                            {{ form.author }}
+
+                            {% if form.author.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.author.errors.0 }}
+                                </div>
+                            {% endif %}
+
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                ISBN
+                            </label>
+
+                            {{ form.isbn }}
+
+                            {% if form.isbn.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.isbn.errors.0 }}
+                                </div>
+                            {% endif %}
+
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Publisher
+                            </label>
+
+                            {{ form.publisher }}
+
+                            {% if form.publisher.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.publisher.errors.0 }}
+                                </div>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Publication Date
+                            </label>
+
+                            {{ form.publication_date }}
+
+                            {% if form.publication_date.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.publication_date.errors.0 }}
+                                </div>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    <div class="mb-4">
+
+                        <label class="form-label">
+                            Description
+                        </label>
+
+                        {{ form.description }}
+
+                        {% if form.description.errors %}
+                            <div class="text-danger mt-1">
+                                {{ form.description.errors.0 }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                    <hr>
+
+                    <h5 class="mb-3">
+                        Images
+                    </h5>
+
+                    <div class="row">
+
+                        <div class="col-lg-6 mb-4">
+
+                            <label class="form-label">
+                                Cover Image
+                            </label>
+
+                            {{ form.cover_image }}
+
+                            {% if form.cover_image.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.cover_image.errors.0 }}
+                                </div>
+                            {% endif %}
+
+                            <div class="mt-3">
+
+                                <img
+                                    id="coverPreview"
+                                    class="img-fluid border rounded d-none"
+                                    style="
+                                        max-height: 350px;
+                                        object-fit: contain;
+                                    "
+                                >
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-lg-6 mb-4">
+
+                            <label class="form-label">
+
+                                Gallery Images
+                                (Minimum 3, Maximum 5)
+
+                            </label>
+
+                            <input
+                                type="file"
+                                name="gallery_images"
+                                multiple
+                                class="form-control"
+                                accept="image/*"
+                                required
+                            >
+                            
+                            <div 
+                                id="galleryError"
+                                class="row mt-3"
+                            ></div>
+
+                            <div
+                                id="galleryPreview"
+                                class="row mt-3"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+                    <hr>
+
+                    <h5 class="mb-3">
+                        Pricing & Inventory
+                    </h5>
+
+                    <div class="row">
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Regular Price
+                            </label>
+
+                            {{ form.regular_price }}
+
+                            {% if form.regular_price.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.regular_price.errors.0 }}
+                                </div>
+                            {% endif %}
+
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Sale Price
+                            </label>
+
+                            {{ form.sale_price }}
+
+                            {% if form.sale_price.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.sale_price.errors.0 }}
+                                </div>
+                            {% endif %}
+
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Stock
+                            </label>
+
+                            {{ form.stock }}
+
+                            {% if form.stock.errors %}
+                                <div class="text-danger mt-1">
+                                    {{ form.stock.errors.0 }}
+                                </div>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    <div class="form-check mb-4">
+
+                        {{ form.is_featured }}
+
+                        <label class="form-check-label">
+
+                            Featured Product
+
+                        </label>
+
+                    </div>
+
+                    <div class="d-flex gap-2">
+
+                        <button
+                            type="submit"
+                            class="btn btn-success"
+                        >
+                            Save Product
+                        </button>
+
+                        <a
+                            href="{% url 'product_management' %}"
+                            class="btn btn-secondary"
+                        >
+                            Cancel
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+<script>
+
+document.addEventListener(
+    'DOMContentLoaded',
+    function() {
+
+        let cropper = null;
+
+        let cropMode = null;
+
+        let currentGalleryIndex = null;
+
+        let galleryFiles = [];
+
+        const coverInput =
+            document.getElementById(
+                'id_cover_image'
+            );
+
+        const coverPreview =
+            document.getElementById(
+                'coverPreview'
+            );
+
+        const cropperImage =
+            document.getElementById(
+                'cropperImage'
+            );
+
+        const cropButton =
+            document.getElementById(
+                'cropImageBtn'
+            );
+
+        const cropperModal =
+            new bootstrap.Modal(
+                document.getElementById(
+                    'cropperModal'
+                )
+            );
+
+        const galleryInput =
+            document.querySelector(
+                'input[name="gallery_images"]'
+            );
+
+        const galleryPreview =
+            document.getElementById(
+                'galleryPreview'
+            );
+
+        const galleryError =
+            document.getElementById(
+                'galleryError'
+            );
+
+        function updateGalleryInput() {
+
+            const dataTransfer =
+                new DataTransfer();
+
+            galleryFiles.forEach(
+                file => {
+
+                    dataTransfer.items.add(
+                        file
+                    );
+
+                }
+            );
+
+            galleryInput.files =
+                dataTransfer.files;
+
+        }
+
+        function renderGalleryPreview() {
+
+    galleryPreview.innerHTML = '';
+
+    galleryFiles.forEach(
+        (
+            file,
+            index
+        ) => {
+
+            const col =
+                document.createElement(
+                    'div'
+                );
+
+            col.className =
+                'col-md-4 mb-3';
+
+            col.innerHTML = `
+                <div class="card h-100">
+
+                    <img
+                        src="${URL.createObjectURL(file)}"
+                        class="card-img-top"
+                        style="
+                            height:200px;
+                            object-fit:cover;
+                        "
+                    >
+
+                    <div class="card-body text-center">
+
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm crop-gallery-image me-2"
+                            data-index="${index}"
+                        >
+                            Crop
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-danger btn-sm remove-gallery-image"
+                            data-index="${index}"
+                        >
+                            Remove
+                        </button>
+
+                    </div>
+
+                </div>
+            `;
+
+            galleryPreview.appendChild(
+                col
+            );
+
+        }
+    );
+
+    document
+        .querySelectorAll(
+            '.remove-gallery-image'
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    'click',
+                    function() {
+
+                        const index =
+                            parseInt(
+                                this.dataset.index
+                            );
+
+                        galleryFiles.splice(
+                            index,
+                            1
+                        );
+
+                        updateGalleryInput();
+
+                        renderGalleryPreview();
+
+                    }
+                );
+
+            }
+        );
+
+    document
+        .querySelectorAll(
+            '.crop-gallery-image'
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    'click',
+                    function() {
+
+                        currentGalleryIndex =
+                            parseInt(
+                                this.dataset.index
+                            );
+
+                        cropMode =
+                            'gallery';
+
+                        const file =
+                            galleryFiles[
+                                currentGalleryIndex
+                            ];
+
+                        const reader =
+                            new FileReader();
+
+                        reader.onload =
+                            function(e) {
+
+                                cropperImage.src =
+                                    e.target.result;
+
+                                cropperModal.show();
+
+                                setTimeout(
+                                    function() {
+
+                                        if (
+                                            cropper
+                                        ) {
+
+                                            cropper.destroy();
+
+                                        }
+
+                                        cropper =
+                                            new Cropper(
+                                                cropperImage,
+                                                {
+                                                    viewMode: 1,
+                                                    autoCropArea: 1,
+                                                    responsive: true,
+                                                }
+                                            );
+
+                                    },
+                                    300
+                                );
+
+                            };
+
+                        reader.readAsDataURL(
+                            file
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+if (coverInput) {
+
+    coverInput.addEventListener(
+        'change',
+        function(event) {
+
+            const file =
+                event.target.files[0];
+
+            if (!file) {
+
+                return;
+
+            }
+
+            cropMode =
+                'cover';
+
+            const reader =
+                new FileReader();
+
+            reader.onload =
+                function(e) {
+
+                    cropperImage.src =
+                        e.target.result;
+
+                    cropperModal.show();
+
+                    setTimeout(
+                        function() {
+
+                            if (
+                                cropper
+                            ) {
+
+                                cropper.destroy();
+
+                            }
+
+                            cropper =
+                                new Cropper(
+                                    cropperImage,
+                                    {
+                                        aspectRatio:
+                                            2 / 3,
+
+                                        viewMode: 1,
+
+                                        autoCropArea: 1,
+
+                                        responsive: true,
+                                    }
+                                );
+
+                        },
+                        300
+                    );
+
+                };
+
+            reader.readAsDataURL(
+                file
+            );
+
+        }
+    );
+
+}
+
+cropButton.addEventListener(
+    'click',
+    function() {
+
+        if (
+            !cropper
+        ) {
+
+            return;
+
+        }
+
+        if (
+            cropMode ===
+            'cover'
+        ) {
+
+            const canvas =
+                cropper.getCroppedCanvas({
+                    width: 1200,
+                    height: 1800,
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high'
+                });
+
+            const originalFile =
+                coverInput.files[0];
+
+            canvas.toBlob(
+                function(blob) {
+
+                    const resizedFile =
+                        new File(
+                            [blob],
+                            originalFile.name,
+                            {
+                                type:
+                                    originalFile.type
+                            }
+                        );
+
+                    const dataTransfer =
+                        new DataTransfer();
+
+                    dataTransfer.items.add(
+                        resizedFile
+                    );
+
+                    coverInput.files =
+                        dataTransfer.files;
+
+                    coverPreview.src =
+                        URL.createObjectURL(
+                            resizedFile
+                        );
+
+                    coverPreview.classList.remove(
+                        'd-none'
+                    );
+
+                    cropperModal.hide();
+
+                },
+                originalFile.type
+            );
+
+        }
+        else if (
+            cropMode ===
+            'gallery'
+        ) {
+
+            const canvas =
+                cropper.getCroppedCanvas({
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high'
+                });
+
+            const originalFile =
+                galleryFiles[
+                    currentGalleryIndex
+                ];
+
+            canvas.toBlob(
+                function(blob) {
+
+                    const croppedFile =
+                        new File(
+                            [blob],
+                            originalFile.name,
+                            {
+                                type:
+                                    originalFile.type
+                            }
+                        );
+
+                    galleryFiles[
+                        currentGalleryIndex
+                    ] = croppedFile;
+
+                    updateGalleryInput();
+
+                    renderGalleryPreview();
+
+                    cropperModal.hide();
+
+                },
+                originalFile.type
+            );
+
+        }
+
+    }
+);
+
+if (galleryInput) {
+
+    galleryInput.addEventListener(
+        'change',
+        function(event) {
+
+            galleryError.innerHTML =
+                '';
+
+            const selectedFiles =
+                Array.from(
+                    event.target.files
+                );
+
+            if (
+                selectedFiles.length < 3
+            ) {
+
+                galleryError.innerHTML =
+                    'Minimum 3 images required.';
+
+                galleryInput.value =
+                    '';
+
+                return;
+
+            }
+
+            if (
+                selectedFiles.length > 5
+            ) {
+
+                galleryError.innerHTML =
+                    'Maximum 5 images allowed.';
+
+                galleryInput.value =
+                    '';
+
+                return;
+
+            }
+
+            galleryFiles =
+                selectedFiles;
+
+            updateGalleryInput();
+
+            renderGalleryPreview();
+
+        }
+    );
+
+}
+
+    }
+);
+
+</script>
+
+{% endblock %}

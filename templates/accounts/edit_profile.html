@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container py-5">
+
+<div class="row justify-content-center">
+
+<div class="col-lg-8">
+
+<div class="card shadow border-0">
+
+<div class="card-body p-4">
+
+<h2 class="text-center mb-4">
+Edit Profile
+</h2>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<form
+    method="POST"
+    enctype="multipart/form-data"
+>
+
+    {% csrf_token %}
+
+    <div class="mb-3">
+
+        <label class="form-label">
+            Email
+        </label>
+
+        <input
+            type="email"
+            value="{{ user_obj.email }}"
+            class="form-control"
+            readonly
+        >
+
+    </div>
+
+    {{ form.as_p }}
+
+    <button
+        type="submit"
+        class="btn btn-primary w-100"
+    >
+        Save Changes
+    </button>
+
+</form>
+
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+{% endblock %}

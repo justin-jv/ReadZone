@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2>
+            My Addresses
+        </h2>
+
+        <a
+            href="{% url 'add_address' %}"
+            class="btn btn-primary"
+        >
+            Add New Address
+        </a>
+
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+
+        {% for address in address_list %}
+
+            <div class="col-md-6 mb-4">
+
+                <div class="card shadow-sm h-100">
+
+                    <div class="card-body">
+
+                        <h5 class="card-title">
+
+                            {{ address.address_label }}
+
+                            {% if address.is_default %}
+
+                                <span class="badge bg-success">
+                                    Default
+                                </span>
+
+                            {% endif %}
+
+                        </h5>
+
+                        <hr>
+
+                        <p>
+                            <strong>Name:</strong>
+                            {{ address.full_name }}
+                        </p>
+
+                        <p>
+                            <strong>Mobile:</strong>
+                            {{ address.mobile_number }}
+                        </p>
+
+                        <p>
+                            {{ address.house_name }}
+                        </p>
+
+                        <p>
+                            {{ address.area_street }}
+                        </p>
+
+                        {% if address.landmark %}
+                            <p>
+                                {{ address.landmark }}
+                            </p>
+                        {% endif %}
+
+                        <p>
+                            {{ address.city }},
+                            {{ address.district }},
+                            {{ address.state }}
+                        </p>
+
+                        <p>
+                            {{ address.country }}
+                        </p>
+
+                        <p>
+                            {{ address.pincode }}
+                        </p>
+
+                    </div>
+
+                    <div class="card-footer bg-white">
+
+                        <a
+                            href="{% url 'edit_address' address.id %}"
+                            class="btn btn-warning btn-sm"
+                        >
+                            Edit
+                        </a>
+
+                        <a
+                            href="{% url 'delete_address' address.id %}"
+                            class="btn btn-danger btn-sm"
+                            onclick="return confirm('Delete this address?')"
+                        >
+                            Delete
+                        </a>
+
+                        {% if not address.is_default %}
+
+                            <a
+                                href="{% url 'set_default_address' address.id %}"
+                                class="btn btn-success btn-sm"
+                            >
+                                Set Default
+                            </a>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% empty %}
+
+            <div class="text-center">
+
+                <h4>
+                    No addresses added yet.
+                </h4>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

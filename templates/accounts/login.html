@@ -1,0 +1,174 @@
+{% extends 'auth_base.html' %}
+
+{% block title %}
+Login | ReadZone
+{% endblock %}
+
+{% block content %}
+
+<div class="auth-card">
+
+    <h2 class="auth-title">
+
+        Welcome Back
+
+    </h2>
+
+    <p class="auth-subtitle">
+
+        Login to continue reading
+
+    </p>
+
+    <a
+        href="/accounts/google/login/"
+        class="btn btn-outline-dark w-100 google-btn"
+    >
+
+        <i class="fab fa-google me-2"></i>
+
+        Continue with Google
+
+    </a>
+
+    <div class="divider">
+
+        <span>
+
+            OR
+
+        </span>
+
+    </div>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <div class="mb-3">
+
+            <label class="form-label">
+
+                Email Address
+
+            </label>
+
+            <input
+                type="email"
+                name="email"
+                class="form-control auth-input"
+                required
+            >
+
+        </div>
+
+        <div class="mb-3">
+
+            <label class="form-label">
+
+                Password
+
+            </label>
+
+            <div class="password-wrapper">
+
+                <input
+                    type="password"
+                    name="password"
+                    id="password"
+                    class="form-control auth-input"
+                    required
+                >
+
+                <span
+                    class="password-toggle"
+                    onclick="togglePassword()"
+                >
+
+                    <i
+                        id="toggleIcon"
+                        class="fas fa-eye"
+                    ></i>
+
+                </span>
+
+            </div>
+
+        </div>
+
+        <button
+            type="submit"
+            class="btn btn-dark w-100 auth-btn"
+        >
+
+            Login
+
+        </button>
+
+    </form>
+
+    <div class="auth-links">
+
+        <a href="{% url 'forgot_password' %}">
+
+            Forgot Password?
+
+        </a>
+
+    </div>
+
+    <div class="auth-links">
+
+        Don't have an account?
+
+        <a href="{% url 'signup' %}">
+
+            Create Account
+
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+
+function togglePassword()
+{
+    const password =
+        document.getElementById(
+            'password'
+        );
+
+    const icon =
+        document.getElementById(
+            'toggleIcon'
+        );
+
+    if(password.type === 'password')
+    {
+        password.type = 'text';
+
+        icon.classList.replace(
+            'fa-eye',
+            'fa-eye-slash'
+        );
+    }
+    else
+    {
+        password.type = 'password';
+
+        icon.classList.replace(
+            'fa-eye-slash',
+            'fa-eye'
+        );
+    }
+}
+
+</script>
+
+{% endblock %}

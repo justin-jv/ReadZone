@@ -1,0 +1,856 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container py-5">
+
+```
+<div class="row justify-content-center">
+
+    <div class="col-xl-10 col-lg-11">
+
+        <div class="card shadow border-0">
+
+            <div class="card-header bg-warning">
+
+                <h3 class="mb-0">
+                    Edit Product
+                </h3>
+
+            </div>
+
+            <div class="card-body">
+
+                {% if form.errors %}
+
+                    <div class="alert alert-danger">
+
+                        <h6 class="mb-2">
+                            Please correct the following errors:
+                        </h6>
+
+                        <ul class="mb-0">
+
+                            {% for field in form %}
+
+                                {% for error in field.errors %}
+
+                                    <li>
+                                        <strong>
+                                            {{ field.label }}
+                                        </strong>
+                                        :
+                                        {{ error }}
+                                    </li>
+
+                                {% endfor %}
+
+                            {% endfor %}
+
+                            {% for error in form.non_field_errors %}
+
+                                <li>
+                                    {{ error }}
+                                </li>
+
+                            {% endfor %}
+
+                        </ul>
+
+                    </div>
+
+                {% endif %}
+
+                <form
+                    method="POST"
+                    enctype="multipart/form-data"
+                >
+
+                    {% csrf_token %}
+
+                    <h5 class="mb-3">
+                        Product Information
+                    </h5>
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+                                Title
+                            </label>
+
+                            {{ form.title }}
+
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+
+                            <label class="form-label">
+                                Category
+                            </label>
+
+                            {{ form.category }}
+
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+
+                            <label class="form-label">
+                                Language
+                            </label>
+
+                            {{ form.language }}
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Author
+                            </label>
+
+                            {{ form.author }}
+
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                ISBN
+                            </label>
+
+                            {{ form.isbn }}
+
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Publisher
+                            </label>
+
+                            {{ form.publisher }}
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Publication Date
+                            </label>
+
+                            {{ form.publication_date }}
+
+                        </div>
+
+                    </div>
+
+                    <div class="mb-4">
+
+                        <label class="form-label">
+                            Description
+                        </label>
+
+                        {{ form.description }}
+
+                    </div>
+
+                    <hr>
+
+                    <h5 class="mb-3">
+                        Cover Image
+                    </h5>
+
+                    {% if product.cover_image %}
+
+                        <div class="mb-4 text-center">
+
+                            <img
+                                src="{{ product.cover_image.url }}"
+                                class="img-fluid border rounded"
+                                style="
+                                    max-height:350px;
+                                    object-fit:contain;
+                                "
+                            >
+
+                        </div>
+
+                    {% endif %}
+
+                    <div class="mb-4">
+
+                        <label class="form-label">
+                            Change Cover Image
+                        </label>
+
+                        {{ form.cover_image }}
+
+                        <div class="mt-3">
+
+                            <img
+                                id="coverPreview"
+                                class="img-fluid border rounded d-none"
+                                style="
+                                    max-height:350px;
+                                    object-fit:contain;
+                                "
+                            >
+
+                        </div>
+
+                        <button
+                            type="button"
+                            id="cropCoverButton"
+                            class="btn btn-primary mt-3 d-none"
+                        >
+
+                            Crop Selected Image
+
+                        </button>
+
+                    </div>
+
+                    <hr>
+
+                    <h5 class="mb-3">
+                        Existing Gallery Images
+                    </h5>
+
+                    <div class="row">
+
+                        {% for image in product.images.all %}
+
+                            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+
+                                <div class="card h-100">
+
+                                    <img
+                                        src="{{ image.image.url }}"
+                                        class="card-img-top"
+                                        style="
+                                            height:220px;
+                                            object-fit:cover;
+                                        "
+                                    >
+
+                                    <div class="card-body text-center">
+
+                                        <a
+                                            href="{% url 'delete_product_image' image.id %}"
+                                            class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Delete this image?')"
+                                        >
+                                            Delete
+                                        </a>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        {% empty %}
+
+                            <div class="col-12">
+
+                                <p class="text-muted">
+                                    No gallery images found.
+                                </p>
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                    <hr>
+
+                    <h5 class="mb-3">
+                        Add More Gallery Images
+                    </h5>
+
+                    <div class="mb-4">
+
+                        <input
+                            type="file"
+                            name="gallery_images"
+                            multiple
+                            class="form-control"
+                            accept="image/*"
+                        >
+
+                        <small class="text-muted">
+
+                            Maximum total gallery images: 5
+
+                        </small>
+
+                        <div
+                            id="galleryPreview"
+                            class="row mt-3"
+                        ></div>
+
+                    </div>
+
+                    <hr>
+
+                    <h5 class="mb-3">
+                        Pricing & Inventory
+                    </h5>
+
+                    <div class="row">
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Regular Price
+                            </label>
+
+                            {{ form.regular_price }}
+
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Sale Price
+                            </label>
+
+                            {{ form.sale_price }}
+
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Stock
+                            </label>
+
+                            {{ form.stock }}
+
+                        </div>
+
+                    </div>
+
+                    <div class="form-check mb-4">
+
+                        {{ form.is_featured }}
+
+                        <label class="form-check-label">
+
+                            Featured Product
+
+                        </label>
+
+                    </div>
+
+                    <div class="d-flex gap-2">
+
+                        <button
+                            type="submit"
+                            class="btn btn-warning"
+                        >
+                            Update Product
+                        </button>
+
+                        <a
+                            href="{% url 'product_management' %}"
+                            class="btn btn-secondary"
+                        >
+                            Cancel
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+<script>
+
+document.addEventListener(
+    'DOMContentLoaded',
+    function() {
+
+        let cropper = null;
+
+        let cropMode = null;
+
+        let currentGalleryIndex = null;
+
+        let galleryFiles = [];
+
+        const coverInput =
+            document.getElementById(
+                'id_cover_image'
+            );
+
+        const coverPreview =
+            document.getElementById(
+                'coverPreview'
+            );
+
+        const cropCoverButton =
+            document.getElementById(
+                'cropCoverButton'
+            );
+
+        const cropperImage =
+            document.getElementById(
+                'cropperImage'
+            );
+
+        const cropButton =
+            document.getElementById(
+                'cropImageBtn'
+            );
+
+        const cropperModal =
+            new bootstrap.Modal(
+                document.getElementById(
+                    'cropperModal'
+                )
+            );
+
+        const galleryInput =
+            document.querySelector(
+                'input[name="gallery_images"]'
+            );
+
+        const galleryPreview =
+            document.getElementById(
+                'galleryPreview'
+            );
+
+        function updateGalleryInput() {
+
+            const dataTransfer =
+                new DataTransfer();
+
+            galleryFiles.forEach(
+                file => {
+
+                    dataTransfer.items.add(
+                        file
+                    );
+
+                }
+            );
+
+            galleryInput.files =
+                dataTransfer.files;
+
+        }
+
+        function renderGalleryPreview() {
+
+            galleryPreview.innerHTML = '';
+
+            galleryFiles.forEach(
+                (
+                    file,
+                    index
+                ) => {
+
+                    const col =
+                        document.createElement(
+                            'div'
+                        );
+
+                    col.className =
+                        'col-md-4 mb-3';
+
+                    col.innerHTML = `
+                        <div class="card h-100">
+
+                            <img
+                                src="${URL.createObjectURL(file)}"
+                                class="card-img-top"
+                                style="
+                                    height:200px;
+                                    object-fit:cover;
+                                "
+                            >
+
+                            <div class="card-body text-center">
+
+                                <button
+                                    type="button"
+                                    class="btn btn-primary btn-sm crop-gallery-image me-2"
+                                    data-index="${index}"
+                                >
+                                    Crop
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="btn btn-danger btn-sm remove-gallery-image"
+                                    data-index="${index}"
+                                >
+                                    Remove
+                                </button>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                    galleryPreview.appendChild(
+                        col
+                    );
+
+                }
+            );
+
+            document
+                .querySelectorAll(
+                    '.remove-gallery-image'
+                )
+                .forEach(
+                    button => {
+
+                        button.addEventListener(
+                            'click',
+                            function() {
+
+                                const index =
+                                    parseInt(
+                                        this.dataset.index
+                                    );
+
+                                galleryFiles.splice(
+                                    index,
+                                    1
+                                );
+
+                                updateGalleryInput();
+
+                                renderGalleryPreview();
+
+                            }
+                        );
+
+                    }
+                );
+
+            document
+                .querySelectorAll(
+                    '.crop-gallery-image'
+                )
+                .forEach(
+                    button => {
+
+                        button.addEventListener(
+                            'click',
+                            function() {
+
+                                currentGalleryIndex =
+                                    parseInt(
+                                        this.dataset.index
+                                    );
+
+                                cropMode =
+                                    'gallery';
+
+                                const file =
+                                    galleryFiles[
+                                        currentGalleryIndex
+                                    ];
+
+                                const reader =
+                                    new FileReader();
+
+                                reader.onload =
+                                    function(e) {
+
+                                        cropperImage.src =
+                                            e.target.result;
+
+                                        cropperModal.show();
+
+                                        setTimeout(
+                                            function() {
+
+                                                if (
+                                                    cropper
+                                                ) {
+
+                                                    cropper.destroy();
+
+                                                }
+
+                                                cropper =
+                                                    new Cropper(
+                                                        cropperImage,
+                                                        {
+                                                            viewMode: 1,
+                                                            autoCropArea: 1,
+                                                            responsive: true,
+                                                        }
+                                                    );
+
+                                            },
+                                            300
+                                        );
+
+                                    };
+
+                                reader.readAsDataURL(
+                                    file
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+        }
+
+        if (coverInput) {
+
+            coverInput.addEventListener(
+                'change',
+                function(event) {
+
+                    const file =
+                        event.target.files[0];
+
+                    if (!file) {
+
+                        return;
+
+                    }
+
+                    coverPreview.src =
+                        URL.createObjectURL(
+                            file
+                        );
+
+                    coverPreview.classList.remove(
+                        'd-none'
+                    );
+
+                    cropCoverButton.classList.remove(
+                        'd-none'
+                    );
+
+                }
+            );
+
+        }
+
+        cropCoverButton.addEventListener(
+            'click',
+            function() {
+
+                const file =
+                    coverInput.files[0];
+
+                if (!file) {
+
+                    return;
+
+                }
+
+                cropMode =
+                    'cover';
+
+                const reader =
+                    new FileReader();
+
+                reader.onload =
+                    function(e) {
+
+                        cropperImage.src =
+                            e.target.result;
+
+                        cropperModal.show();
+
+                        setTimeout(
+                            function() {
+
+                                if (
+                                    cropper
+                                ) {
+
+                                    cropper.destroy();
+
+                                }
+
+                                cropper =
+                                    new Cropper(
+                                        cropperImage,
+                                        {
+                                            aspectRatio: 2 / 3,
+                                            viewMode: 1,
+                                            autoCropArea: 1,
+                                            responsive: true,
+                                        }
+                                    );
+
+                            },
+                            300
+                        );
+
+                    };
+
+                reader.readAsDataURL(
+                    file
+                );
+
+            }
+        );
+
+        cropButton.addEventListener(
+            'click',
+            function() {
+
+                if (!cropper) {
+
+                    return;
+
+                }
+
+                if (
+                    cropMode ===
+                    'cover'
+                ) {
+
+                    const canvas =
+                        cropper.getCroppedCanvas({
+                            width: 1200,
+                            height: 1800
+                        });
+
+                    const originalFile =
+                        coverInput.files[0];
+
+                    canvas.toBlob(
+                        function(blob) {
+
+                            const croppedFile =
+                                new File(
+                                    [blob],
+                                    originalFile.name,
+                                    {
+                                        type:
+                                            originalFile.type
+                                    }
+                                );
+
+                            const dataTransfer =
+                                new DataTransfer();
+
+                            dataTransfer.items.add(
+                                croppedFile
+                            );
+
+                            coverInput.files =
+                                dataTransfer.files;
+
+                            coverPreview.src =
+                                URL.createObjectURL(
+                                    croppedFile
+                                );
+
+                            coverPreview.classList.remove(
+                                'd-none'
+                            );
+
+                            cropperModal.hide();
+
+                        },
+                        originalFile.type
+                    );
+
+                }
+                else if (
+                    cropMode ===
+                    'gallery'
+                ) {
+
+                    const canvas =
+                        cropper.getCroppedCanvas();
+
+                    const originalFile =
+                        galleryFiles[
+                            currentGalleryIndex
+                        ];
+
+                    canvas.toBlob(
+                        function(blob) {
+
+                            const croppedFile =
+                                new File(
+                                    [blob],
+                                    originalFile.name,
+                                    {
+                                        type:
+                                            originalFile.type
+                                    }
+                                );
+
+                            galleryFiles[
+                                currentGalleryIndex
+                            ] = croppedFile;
+
+                            updateGalleryInput();
+
+                            renderGalleryPreview();
+
+                            cropperModal.hide();
+
+                        },
+                        originalFile.type
+                    );
+
+                }
+
+            }
+        );
+
+        if (galleryInput) {
+
+            galleryInput.addEventListener(
+                'change',
+                function(event) {
+
+                    galleryFiles =
+                        Array.from(
+                            event.target.files
+                        );
+
+                    updateGalleryInput();
+
+                    renderGalleryPreview();
+
+                }
+            );
+
+        }
+
+    }
+);
+
+</script>
+{% endblock %}

@@ -1,0 +1,176 @@
+body{
+    background:#f8f9fa;
+}
+
+.hero-section{
+    background:white;
+    box-shadow:0 0 15px rgba(0,0,0,0.1);
+}
+
+.book-card{
+    transition:0.3s;
+}
+
+.book-card:hover{
+    transform:translateY(-5px);
+}
+
+.quote-banner{
+    background:#1e3a5f;
+    color:white;
+}
+
+.card{
+    border-radius:15px;
+}
+
+.btn{
+    border-radius:10px;
+}
+
+.form-control{
+    border-radius:10px;
+}
+
+.card:hover{
+    transition:0.3s;
+}
+
+body{
+    min-height:100vh;
+}
+.card{
+    border-radius:15px;
+}
+
+.card-footer{
+    border-top:none;
+}
+
+.badge{
+    font-size:0.8rem;
+}
+
+/* =========================
+   ADMIN LOGIN
+========================= */
+
+.admin-login-page {
+
+    background:
+        linear-gradient(
+            135deg,
+            #f8fafc,
+            #e2e8f0
+        );
+
+}
+
+.admin-login-card {
+
+    background: #ffffff;
+
+    padding: 40px;
+
+    border-radius: 24px;
+
+    box-shadow:
+        0 20px 40px rgba(
+            0,
+            0,
+            0,
+            0.08
+        );
+
+}
+
+.admin-icon {
+
+    width: 80px;
+
+    height: 80px;
+
+    margin: auto;
+
+    margin-bottom: 20px;
+
+    border-radius: 50%;
+
+    background: #111827;
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 2rem;
+}
+
+.admin-title {
+
+    font-size: 2rem;
+
+    font-weight: 700;
+
+    color: #111827;
+}
+
+.admin-subtitle {
+
+    color: #64748b;
+
+    margin-top: 10px;
+}
+
+.admin-input {
+
+    height: 52px;
+
+    border-radius: 12px;
+}
+
+.password-wrapper {
+
+    position: relative;
+}
+
+.password-toggle {
+
+    position: absolute;
+
+    top: 50%;
+
+    right: 15px;
+
+    transform: translateY(-50%);
+
+    cursor: pointer;
+
+    color: #64748b;
+}
+
+.admin-login-btn {
+
+    height: 52px;
+
+    border-radius: 12px;
+
+    font-weight: 600;
+}
+
+@media (max-width: 576px) {
+
+    .admin-login-card {
+
+        padding: 25px;
+    }
+
+    .admin-title {
+
+        font-size: 1.6rem;
+    }
+
+}

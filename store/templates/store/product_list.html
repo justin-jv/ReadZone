@@ -1,0 +1,1408 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'store/css/shop.css' %}">
+
+<style>
+:root{
+--shop-card:rgba(255,255,255,.72);
+--shop-border:rgba(31,45,40,.08);
+--shop-primary:#23473b;
+--shop-accent:#c49a5a;
+}
+
+.shop-page{padding-bottom:3rem;}
+
+.filter-card,.book-card,.results-bar{
+background:var(--shop-card);
+backdrop-filter:blur(18px);
+border:1px solid var(--shop-border);
+border-radius:24px;
+box-shadow:0 12px 30px rgba(0,0,0,.04);
+}
+
+.filter-card{padding:1.5rem;position:sticky;top:100px;}
+.results-bar{
+padding:1rem 1.25rem;
+display:flex;justify-content:space-between;align-items:center;
+margin-bottom:1rem;
+}
+
+.shop-title{font-size:3rem;font-weight:800;color:var(--shop-primary);}
+.shop-subtitle{color:#66756e;}
+
+.book-card{
+overflow:hidden;
+transition:.35s;
+height:100%;
+}
+.book-card:hover{
+transform:translateY(-8px);
+}
+
+.book-image-wrapper{position:relative;overflow:hidden;}
+.book-image{
+width:100%;
+height:300px;
+object-fit:cover;
+transition:.4s;
+}
+.book-card:hover .book-image{
+transform:scale(1.05);
+}
+
+.discount-badge,.stock-badge{
+position:absolute;
+left:12px;
+z-index:2;
+padding:.45rem .75rem;
+border-radius:999px;
+font-size:.75rem;
+font-weight:700;
+}
+.discount-badge{
+top:12px;background:#dcfce7;color:#166534;
+}
+.stock-badge{
+top:52px;background:#fee2e2;color:#991b1b;
+}
+
+.wishlist-btn{
+position:absolute;
+right:12px;
+top:12px;
+width:42px;height:42px;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:50%;
+background:white;
+text-decoration:none;
+color:#e11d48;
+z-index:2;
+}
+
+.book-body{padding:1.25rem;}
+.category-chip{
+display:inline-block;
+padding:.35rem .75rem;
+border-radius:999px;
+background:rgba(35,71,59,.1);
+color:var(--shop-primary);
+font-size:.75rem;
+font-weight:600;
+margin-bottom:.75rem;
+}
+
+.book-title{
+font-weight:700;
+min-height:48px;
+}
+.book-author{color:#66756e;}
+
+.old-price{
+text-decoration:line-through;
+color:#888;
+margin-right:8px;
+}
+.new-price{
+font-size:1.1rem;
+font-weight:800;
+color:var(--shop-primary);
+}
+
+.book-body .btn-dark{
+background:linear-gradient(135deg,#23473b,#3f6f5d);
+border:none;
+border-radius:14px;
+}
+
+.empty-state{
+text-align:center;
+padding:5rem 1rem;
+background:var(--shop-card);
+border-radius:24px;
+border:1px solid var(--shop-border);
+}
+.empty-state i{
+font-size:4rem;
+margin-bottom:1rem;
+}
+
+@media(max-width:768px){
+.shop-title{font-size:2rem;}
+.book-image{height:220px;}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- KEEP ALL YOUR EXISTING HTML BELOW UNCHANGED -->
+<!-- Paste the exact content from your current product_list.html here -->
+<!-- This redesign only adds styling and preserves all backend functionality -->
+
+<div class="shop-page">
+
+    <div class="container py-4">
+
+        <!-- BREADCRUMB -->
+
+        <nav class="mb-3">
+
+            <ol class="breadcrumb">
+
+                <li class="breadcrumb-item">
+
+                    <a href="{% url 'landing_page' %}">
+                        Home
+                    </a>
+
+                </li>
+
+                <li class="breadcrumb-item active">
+                    Shop
+                </li>
+
+            </ol>
+
+        </nav>
+
+        <!-- HEADER -->
+
+        <div class="shop-header mb-4">
+
+            <h1 class="shop-title">
+                Shop Books
+            </h1>
+
+            <p class="shop-subtitle">
+                Discover books you'll love.
+            </p>
+
+        </div>
+
+        <!-- MOBILE FILTER BUTTON -->
+
+        <div class="d-lg-none mb-4">
+
+            <button
+                class="btn btn-dark"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#mobileFilters"
+            >
+
+                <i class="fas fa-filter me-2"></i>
+
+                Filters
+
+            </button>
+
+        </div>
+
+        <!-- MOBILE FILTERS -->
+
+        <div
+            class="offcanvas offcanvas-start"
+            tabindex="-1"
+            id="mobileFilters"
+        >
+
+            <div class="offcanvas-header">
+
+                <h5 class="offcanvas-title">
+                    Filters
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="offcanvas"
+                ></button>
+
+            </div>
+
+            <div class="offcanvas-body">
+
+                <form method="GET">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Search
+                        </label>
+
+                        <input
+                            type="text"
+                            name="search"
+                            value="{{ search }}"
+                            class="form-control"
+                            placeholder="Search books..."
+                        >
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Category
+                        </label>
+
+                        <select
+                            name="category"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                All Categories
+                            </option>
+
+                            {% for category in categories %}
+
+                                <option
+                                    value="{{ category.id }}"
+                                    {% if category_id == category.id|stringformat:"s" %}
+                                    selected
+                                    {% endif %}
+                                >
+                                    {{ category.name }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Language
+                        </label>
+
+                        <select
+                            name="language"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                All Languages
+                            </option>
+
+                            {% for language in languages %}
+
+                                <option
+                                    value="{{ language.id }}"
+                                    {% if language_id == language.id|stringformat:"s" %}
+                                    selected
+                                    {% endif %}
+                                >
+                                    {{ language.name }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Minimum Price
+                        </label>
+
+                        <input
+                            type="number"
+                            name="min_price"
+                            value="{{ min_price }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Maximum Price
+                        </label>
+
+                        <input
+                            type="number"
+                            name="max_price"
+                            value="{{ max_price }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+                    <div class="mb-4">
+
+                        <label class="form-label">
+                            Sort By
+                        </label>
+
+                        <select
+                            name="sort"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                Newest First
+                            </option>
+
+                            <option
+                                value="featured"
+                                {% if sort == 'featured' %}selected{% endif %}
+                            >
+                                Featured
+                            </option>
+
+                            <option
+                                value="best_seller"
+                                {% if sort == 'best_seller' %}selected{% endif %}
+                            >
+                                Best Sellers
+                            </option>
+
+                            <option
+                                value="price_low"
+                                {% if sort == 'price_low' %}selected{% endif %}
+                            >
+                                Price Low → High
+                            </option>
+
+                            <option
+                                value="price_high"
+                                {% if sort == 'price_high' %}selected{% endif %}
+                            >
+                                Price High → Low
+                            </option>
+
+                            <option
+                                value="a_z"
+                                {% if sort == 'a_z' %}selected{% endif %}
+                            >
+                                A → Z
+                            </option>
+
+                            <option
+                                value="z_a"
+                                {% if sort == 'z_a' %}selected{% endif %}
+                            >
+                                Z → A
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn btn-dark w-100 mb-2"
+                    >
+                        Apply Filters
+                    </button>
+
+                    <a
+                        href="{% url 'shop' %}"
+                        class="btn btn-outline-secondary w-100"
+                    >
+                        Reset Filters
+                    </a>
+
+                </form>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <!-- DESKTOP FILTERS -->
+
+            <div class="col-lg-3 d-none d-lg-block">
+
+                <div class="filter-card">
+
+                    <h4 class="filter-title">
+                        Filters
+                    </h4>
+
+                    <!-- SAME FILTER FORM -->
+                    <!-- Copy the exact desktop filter form you're already using -->
+                    <!-- No changes needed there -->
+
+                    <form method="GET">
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Search
+                            </label>
+
+                            <input
+                                type="text"
+                                name="search"
+                                value="{{ search }}"
+                                class="form-control"
+                            >
+
+                        </div>
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Category
+                            </label>
+
+                            <select
+                                name="category"
+                                class="form-select"
+                            >
+
+                                <option value="">
+                                    All Categories
+                                </option>
+
+                                {% for category in categories %}
+
+                                <option
+                                    value="{{ category.id }}"
+                                    {% if category_id == category.id|stringformat:"s" %}
+                                    selected
+                                    {% endif %}
+                                >
+                                    {{ category.name }}
+                                </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Language
+                            </label>
+
+                            <select
+                                name="language"
+                                class="form-select"
+                            >
+
+                                <option value="">
+                                    All Languages
+                                </option>
+
+                                {% for language in languages %}
+
+                                <option
+                                    value="{{ language.id }}"
+                                    {% if language_id == language.id|stringformat:"s" %}
+                                    selected
+                                    {% endif %}
+                                >
+                                    {{ language.name }}
+                                </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Min Price
+                            </label>
+
+                            <input
+                                type="number"
+                                name="min_price"
+                                value="{{ min_price }}"
+                                class="form-control"
+                            >
+
+                        </div>
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Max Price
+                            </label>
+
+                            <input
+                                type="number"
+                                name="max_price"
+                                value="{{ max_price }}"
+                                class="form-control"
+                            >
+
+                        </div>
+
+                        <button
+                            class="btn btn-dark w-100 mb-2"
+                            type="submit"
+                        >
+                            Apply Filters
+                        </button>
+
+                        <a
+                            href="{% url 'shop' %}"
+                            class="btn btn-outline-secondary w-100"
+                        >
+                            Reset Filters
+                        </a>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+            <!-- PRODUCTS -->
+
+            <div class="col-lg-9">
+
+                <div class="results-bar">
+
+                    <h5>
+
+                        Showing
+
+                        {{ page_obj.start_index }}
+
+                        -
+
+                        {{ page_obj.end_index }}
+
+                        of
+
+                        {{ page_obj.paginator.count }}
+
+                        Books
+
+                    </h5>
+
+                    {% if search %}
+
+                    <a
+                        href="{% url 'shop' %}"
+                        class="btn btn-outline-danger btn-sm"
+                    >
+                        Clear Search
+                    </a>
+
+                    {% endif %}
+
+                </div>
+
+                {% if page_obj.object_list %}
+
+                <div class="row g-4 mt-1">
+
+                    {% for product in page_obj %}
+
+                    <div class="col-6 col-md-4 col-xl-3">
+
+                        <div class="book-card">
+
+                            <div class="book-image-wrapper">
+
+                                {% if product.discount_percentage > 0 %}
+
+                                <span class="discount-badge">
+
+                                    {{ product.discount_percentage }}% OFF
+
+                                </span>
+
+                                {% endif %}
+
+                                {% if product.stock == 0 %}
+
+                                <span class="stock-badge">
+
+                                    Out of Stock
+
+                                </span>
+
+                                {% endif %}
+
+                                <a
+                                    href="{% url 'toggle_wishlist' product.id %}"
+                                    class="wishlist-btn"
+                                >
+
+                                    {% if product.id in wishlist_product_ids %}
+
+                                    <i class="fas fa-heart"></i>
+
+                                    {% else %}
+
+                                    <i class="far fa-heart"></i>
+
+                                    {% endif %}
+
+                                </a>
+
+                                {% if product.cover_image %}
+
+                                <img
+                                    src="{{ product.cover_image.url }}"
+                                    alt="{{ product.title }}"
+                                    class="book-image"
+                                >
+
+                                {% else %}
+
+                                <img
+                                    src="{% static 'store/images/book_placeholder.jpg' %}"
+                                    alt="No Image"
+                                    class="book-image"
+                                >
+
+                                {% endif %}
+
+                            </div> 
+                            <div class="book-body">
+
+                                <span class="category-chip">
+
+                                    {{ product.category.name }}
+
+                                </span>
+
+                                <h6 class="book-title">
+
+                                    {{ product.title }}
+
+                                </h6>
+
+                                <p class="book-author">
+
+                                    {{ product.author }}
+
+                                </p>
+
+                                <div class="price-section">
+
+                                    {% if product.sale_price %}
+
+                                    <span class="old-price">
+
+                                        ₹{{ product.regular_price }}
+
+                                    </span>
+
+                                    <span class="new-price">
+
+                                        ₹{{ product.sale_price }}
+
+                                    </span>
+
+                                    {% else %}
+
+                                    <span class="new-price">
+
+                                        ₹{{ product.regular_price }}
+
+                                    </span>
+
+                                    {% endif %}
+
+                                </div>
+
+                                <a
+                                    href="{% url 'product_detail' product.slug %}"
+                                    class="btn btn-dark w-100 mt-3"
+                                >
+                                    View Book
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+                {% else %}
+
+                <div class="empty-state">
+
+                    <i class="fas fa-book-open"></i>
+
+                    <h3>
+                        No Books Found
+                    </h3>
+
+                    <p>
+                        Try changing your filters.
+                    </p>
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+
+{% endblock %}
+
+
+
+
+
+
+
+{% comment %} Original {% endcomment %}
+
+{% comment %} {% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link
+    rel="stylesheet"
+    href="{% static 'store/css/shop.css' %}"
+>
+{% endblock %}
+
+{% block content %}
+
+<div class="shop-page">
+
+    <div class="container py-4">
+
+        <!-- BREADCRUMB -->
+
+        <nav class="mb-3">
+
+            <ol class="breadcrumb">
+
+                <li class="breadcrumb-item">
+
+                    <a href="{% url 'landing_page' %}">
+                        Home
+                    </a>
+
+                </li>
+
+                <li class="breadcrumb-item active">
+                    Shop
+                </li>
+
+            </ol>
+
+        </nav>
+
+        <!-- HEADER -->
+
+        <div class="shop-header mb-4">
+
+            <h1 class="shop-title">
+                Shop Books
+            </h1>
+
+            <p class="shop-subtitle">
+                Discover books you'll love.
+            </p>
+
+        </div>
+
+        <!-- MOBILE FILTER BUTTON -->
+
+        <div class="d-lg-none mb-4">
+
+            <button
+                class="btn btn-dark"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#mobileFilters"
+            >
+
+                <i class="fas fa-filter me-2"></i>
+
+                Filters
+
+            </button>
+
+        </div>
+
+        <!-- MOBILE FILTERS -->
+
+        <div
+            class="offcanvas offcanvas-start"
+            tabindex="-1"
+            id="mobileFilters"
+        >
+
+            <div class="offcanvas-header">
+
+                <h5 class="offcanvas-title">
+                    Filters
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="offcanvas"
+                ></button>
+
+            </div>
+
+            <div class="offcanvas-body">
+
+                <form method="GET">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Search
+                        </label>
+
+                        <input
+                            type="text"
+                            name="search"
+                            value="{{ search }}"
+                            class="form-control"
+                            placeholder="Search books..."
+                        >
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Category
+                        </label>
+
+                        <select
+                            name="category"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                All Categories
+                            </option>
+
+                            {% for category in categories %}
+
+                                <option
+                                    value="{{ category.id }}"
+                                    {% if category_id == category.id|stringformat:"s" %}
+                                    selected
+                                    {% endif %}
+                                >
+                                    {{ category.name }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Language
+                        </label>
+
+                        <select
+                            name="language"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                All Languages
+                            </option>
+
+                            {% for language in languages %}
+
+                                <option
+                                    value="{{ language.id }}"
+                                    {% if language_id == language.id|stringformat:"s" %}
+                                    selected
+                                    {% endif %}
+                                >
+                                    {{ language.name }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Minimum Price
+                        </label>
+
+                        <input
+                            type="number"
+                            name="min_price"
+                            value="{{ min_price }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Maximum Price
+                        </label>
+
+                        <input
+                            type="number"
+                            name="max_price"
+                            value="{{ max_price }}"
+                            class="form-control"
+                        >
+
+                    </div>
+
+                    <div class="mb-4">
+
+                        <label class="form-label">
+                            Sort By
+                        </label>
+
+                        <select
+                            name="sort"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                Newest First
+                            </option>
+
+                            <option
+                                value="featured"
+                                {% if sort == 'featured' %}selected{% endif %}
+                            >
+                                Featured
+                            </option>
+
+                            <option
+                                value="best_seller"
+                                {% if sort == 'best_seller' %}selected{% endif %}
+                            >
+                                Best Sellers
+                            </option>
+
+                            <option
+                                value="price_low"
+                                {% if sort == 'price_low' %}selected{% endif %}
+                            >
+                                Price Low → High
+                            </option>
+
+                            <option
+                                value="price_high"
+                                {% if sort == 'price_high' %}selected{% endif %}
+                            >
+                                Price High → Low
+                            </option>
+
+                            <option
+                                value="a_z"
+                                {% if sort == 'a_z' %}selected{% endif %}
+                            >
+                                A → Z
+                            </option>
+
+                            <option
+                                value="z_a"
+                                {% if sort == 'z_a' %}selected{% endif %}
+                            >
+                                Z → A
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn btn-dark w-100 mb-2"
+                    >
+                        Apply Filters
+                    </button>
+
+                    <a
+                        href="{% url 'shop' %}"
+                        class="btn btn-outline-secondary w-100"
+                    >
+                        Reset Filters
+                    </a>
+
+                </form>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <!-- DESKTOP FILTERS -->
+
+            <div class="col-lg-3 d-none d-lg-block">
+
+                <div class="filter-card">
+
+                    <h4 class="filter-title">
+                        Filters
+                    </h4>
+
+                    <!-- SAME FILTER FORM -->
+                    <!-- Copy the exact desktop filter form you're already using -->
+                    <!-- No changes needed there -->
+
+                    <form method="GET">
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Search
+                            </label>
+
+                            <input
+                                type="text"
+                                name="search"
+                                value="{{ search }}"
+                                class="form-control"
+                            >
+
+                        </div>
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Category
+                            </label>
+
+                            <select
+                                name="category"
+                                class="form-select"
+                            >
+
+                                <option value="">
+                                    All Categories
+                                </option>
+
+                                {% for category in categories %}
+
+                                <option
+                                    value="{{ category.id }}"
+                                    {% if category_id == category.id|stringformat:"s" %}
+                                    selected
+                                    {% endif %}
+                                >
+                                    {{ category.name }}
+                                </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Language
+                            </label>
+
+                            <select
+                                name="language"
+                                class="form-select"
+                            >
+
+                                <option value="">
+                                    All Languages
+                                </option>
+
+                                {% for language in languages %}
+
+                                <option
+                                    value="{{ language.id }}"
+                                    {% if language_id == language.id|stringformat:"s" %}
+                                    selected
+                                    {% endif %}
+                                >
+                                    {{ language.name }}
+                                </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Min Price
+                            </label>
+
+                            <input
+                                type="number"
+                                name="min_price"
+                                value="{{ min_price }}"
+                                class="form-control"
+                            >
+
+                        </div>
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Max Price
+                            </label>
+
+                            <input
+                                type="number"
+                                name="max_price"
+                                value="{{ max_price }}"
+                                class="form-control"
+                            >
+
+                        </div>
+
+                        <button
+                            class="btn btn-dark w-100 mb-2"
+                            type="submit"
+                        >
+                            Apply Filters
+                        </button>
+
+                        <a
+                            href="{% url 'shop' %}"
+                            class="btn btn-outline-secondary w-100"
+                        >
+                            Reset Filters
+                        </a>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+            <!-- PRODUCTS -->
+
+            <div class="col-lg-9">
+
+                <div class="results-bar">
+
+                    <h5>
+
+                        Showing
+
+                        {{ page_obj.start_index }}
+
+                        -
+
+                        {{ page_obj.end_index }}
+
+                        of
+
+                        {{ page_obj.paginator.count }}
+
+                        Books
+
+                    </h5>
+
+                    {% if search %}
+
+                    <a
+                        href="{% url 'shop' %}"
+                        class="btn btn-outline-danger btn-sm"
+                    >
+                        Clear Search
+                    </a>
+
+                    {% endif %}
+
+                </div>
+
+                {% if page_obj.object_list %}
+
+                <div class="row g-4 mt-1">
+
+                    {% for product in page_obj %}
+
+                    <div class="col-6 col-md-4 col-xl-3">
+
+                        <div class="book-card">
+
+                            <div class="book-image-wrapper">
+
+                                {% if product.discount_percentage > 0 %}
+
+                                <span class="discount-badge">
+
+                                    {{ product.discount_percentage }}% OFF
+
+                                </span>
+
+                                {% endif %}
+
+                                {% if product.stock == 0 %}
+
+                                <span class="stock-badge">
+
+                                    Out of Stock
+
+                                </span>
+
+                                {% endif %}
+
+                                <a
+                                    href="{% url 'toggle_wishlist' product.id %}"
+                                    class="wishlist-btn"
+                                >
+
+                                    {% if product.id in wishlist_product_ids %}
+
+                                    <i class="fas fa-heart"></i>
+
+                                    {% else %}
+
+                                    <i class="far fa-heart"></i>
+
+                                    {% endif %}
+
+                                </a>
+
+                                {% if product.cover_image %}
+
+                                <img
+                                    src="{{ product.cover_image.url }}"
+                                    alt="{{ product.title }}"
+                                    class="book-image"
+                                >
+
+                                {% else %}
+
+                                <img
+                                    src="{% static 'store/images/book_placeholder.jpg' %}"
+                                    alt="No Image"
+                                    class="book-image"
+                                >
+
+                                {% endif %}
+
+                            </div> 
+                            <div class="book-body">
+
+                                <span class="category-chip">
+
+                                    {{ product.category.name }}
+
+                                </span>
+
+                                <h6 class="book-title">
+
+                                    {{ product.title }}
+
+                                </h6>
+
+                                <p class="book-author">
+
+                                    {{ product.author }}
+
+                                </p>
+
+                                <div class="price-section">
+
+                                    {% if product.sale_price %}
+
+                                    <span class="old-price">
+
+                                        ₹{{ product.regular_price }}
+
+                                    </span>
+
+                                    <span class="new-price">
+
+                                        ₹{{ product.sale_price }}
+
+                                    </span>
+
+                                    {% else %}
+
+                                    <span class="new-price">
+
+                                        ₹{{ product.regular_price }}
+
+                                    </span>
+
+                                    {% endif %}
+
+                                </div>
+
+                                <a
+                                    href="{% url 'product_detail' product.slug %}"
+                                    class="btn btn-dark w-100 mt-3"
+                                >
+                                    View Book
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+                {% else %}
+
+                <div class="empty-state">
+
+                    <i class="fas fa-book-open"></i>
+
+                    <h3>
+                        No Books Found
+                    </h3>
+
+                    <p>
+                        Try changing your filters.
+                    </p>
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %} {% endcomment %}

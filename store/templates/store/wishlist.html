@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{% static 'store/css/wishlist.css' %}"
+>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h1>
+            My Wishlist
+        </h1>
+
+        <a
+            href="{% url 'shop' %}"
+            class="btn btn-dark"
+        >
+            Continue Shopping
+        </a>
+
+    </div>
+
+    {% if wishlist_items %}
+
+    <div class="row g-4">
+
+        {% for item in wishlist_items %}
+
+        <div class="col-12 col-md-6 col-lg-4">
+
+            <div class="wishlist-card">
+
+                {% if item.product.cover_image %}
+
+                <img
+                    src="{{ item.product.cover_image.url }}"
+                    class="wishlist-image"
+                    alt="{{ item.product.title }}"
+                >
+
+                {% else %}
+
+                <img
+                    src="{% static 'store/images/book_placeholder.jpg' %}"
+                    class="wishlist-image"
+                    alt="No Image"
+                >
+
+                {% endif %}
+
+                <div class="wishlist-body">
+
+                    <h5>
+
+                        {{ item.product.title }}
+
+                    </h5>
+
+                    <p>
+
+                        {{ item.product.author }}
+
+                    </p>
+
+                    <div class="mb-2">
+
+                        {% if item.product.sale_price %}
+
+                        <span class="old-price">
+
+                            ₹{{ item.product.regular_price }}
+
+                        </span>
+
+                        <span class="new-price">
+
+                            ₹{{ item.product.sale_price }}
+
+                        </span>
+
+                        {% else %}
+
+                        <span class="new-price">
+
+                            ₹{{ item.product.regular_price }}
+
+                        </span>
+
+                        {% endif %}
+
+                    </div>
+
+                    {% if item.product.stock > 0 %}
+
+                    <span class="text-success fw-bold">
+
+                        In Stock
+
+                    </span>
+
+                    {% else %}
+
+                    <span class="text-danger fw-bold">
+
+                        Out of Stock
+
+                    </span>
+
+                    {% endif %}
+
+                    <div class="d-grid gap-2 mt-3">
+
+                        {% if item.product.stock > 0 %}
+
+                        <a
+                            href="{% url 'add_to_cart' item.product.id %}"
+                            class="btn btn-success"
+                        >
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            Add To Cart
+                        </a>
+
+                        {% endif %}
+
+                        <a
+                            href="{% url 'product_detail' item.product.slug %}"
+                            class="btn btn-dark"
+                        >
+                            View Book
+                        </a>
+
+                        <a
+                            href="{% url 'toggle_wishlist' item.product.id %}"
+                            class="btn btn-outline-danger"
+                        >
+                            Remove
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <div class="empty-wishlist">
+
+        <i class="fas fa-heart-broken"></i>
+
+        <h3>
+            Your Wishlist Is Empty
+        </h3>
+
+        <p>
+            Save books you love and find them later.
+        </p>
+
+        <a
+            href="{% url 'shop' %}"
+            class="btn btn-dark"
+        >
+            Browse Books
+        </a>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

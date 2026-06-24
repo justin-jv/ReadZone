@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <h2 class="mb-4">
+
+        Order Details
+
+    </h2>
+
+    <div class="card mb-4">
+
+        <div class="card-body">
+
+            <p>
+
+                <strong>Order ID:</strong>
+
+                {{ order.order_id }}
+
+            </p>
+
+            <p>
+
+                <strong>Customer:</strong>
+
+                {{ order.full_name }}
+
+            </p>
+
+            <p>
+
+                <strong>Email:</strong>
+
+                {{ order.user.email }}
+
+            </p>
+
+            <p>
+
+                <strong>Total:</strong>
+
+                ₹{{ order.total_amount }}
+
+            </p>
+
+            <p>
+
+                <strong>Payment:</strong>
+
+                {{ order.get_payment_method_display }}
+
+            </p>
+
+            <p>
+
+                <strong>Status:</strong>
+
+                {{ order.get_order_status_display }}
+
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="card mb-4">
+
+        <div class="card-body">
+
+            <h5>
+
+                Delivery Address
+
+            </h5>
+
+            <hr>
+
+            {{ order.full_name }}
+
+            <br>
+
+            {{ order.house_name }}
+
+            <br>
+
+            {{ order.area_street }}
+
+            <br>
+
+            {{ order.city }}
+
+            <br>
+
+            {{ order.state }}
+
+            -
+            {{ order.pincode }}
+
+        </div>
+
+    </div>
+
+    {% for item in order.items.all %}
+
+    <div class="card mb-3">
+
+        <div class="card-body">
+
+            <div class="row align-items-center">
+
+                <div class="col-md-2">
+
+                    {% if item.product_image %}
+
+                    <img
+                        src="{{ item.product_image.url }}"
+                        class="img-fluid rounded"
+                    >
+
+                    {% endif %}
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <h5>
+
+                        {{ item.product_title }}
+
+                    </h5>
+
+                </div>
+
+                <div class="col-md-1">
+
+                    Qty:
+                    {{ item.quantity }}
+
+                </div>
+
+                <div class="col-md-2">
+
+                    ₹{{ item.subtotal }}
+
+                </div>
+
+                <div class="col-md-2">
+                                
+                    {{ item.get_status_display }}
+
+                    {% if item.return_reason %}
+
+                    <div class="mt-2">
+
+                        <small>
+
+                            <strong>
+                                Return Reason:
+                            </strong>
+
+                            <br>
+
+                            {{ item.return_reason }}
+
+                        </small>
+
+                    </div>
+
+                    {% endif %}
+
+                    {% if item.cancel_reason %}
+
+                    <div class="mt-2">
+
+                        <small>
+
+                            <strong>
+                                Cancel Reason:
+                            </strong>
+
+                            <br>
+
+                            {{ item.cancel_reason }}
+
+                        </small>
+
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+                <div class="col-md-2">
+
+                    {% if item.status == 'pending' or item.status == 'shipped' or item.status == 'out_for_delivery' %}
+
+                    <form
+                        method="post"
+                        action="{% url 'update_order_item_status' item.id %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <select
+                            name="status"
+                            class="form-select mb-2"
+                        >
+
+                            {% if item.status == 'pending' %}
+
+                                <option value="shipped">
+                                    Shipped
+                                </option>
+
+                                {% endif %}
+
+                                {% if item.status == 'shipped' %}
+
+                                <option value="out_for_delivery">
+                                    Out For Delivery
+                                </option>
+
+                                {% endif %}
+
+                                {% if item.status == 'out_for_delivery' %}
+
+                                <option value="delivered">
+                                    Delivered
+                                </option>
+
+                                {% endif %}
+
+
+{% comment %} 
+
+                            <option 
+                                value="pending"
+                                {% if item.status == 'pending' %}selected{% endif %}
+                            >              
+                                Pending
+                            </option>
+
+                            <option 
+                                value="shipped"
+                                {% if item.status == 'shipped' %}selected{% endif %}    
+                            >
+                                Shipped
+                            </option>
+
+                            <option 
+                                value="out_for_delivery"
+                                {% if item.status == 'out_for_delivery' %}selected{% endif %}    
+                            >
+                                Out For Delivery
+                            </option>
+
+                            <option 
+                                value="delivered"
+                                {% if item.status == 'delivered' %}selected{% endif %}
+                            >
+                                Delivered
+                            </option> {% endcomment %}
+
+                        </select>
+
+                        <button
+                            class="btn btn-dark btn-sm w-100"
+                        >
+
+                            Update
+
+                        </button>
+
+                    </form>
+
+                    {% endif %}
+
+                    {% if item.status == 'return_requested' %}
+
+                    <form
+                        method="post"
+                        action="{% url 'approve_return' item.id %}"
+                        class="mt-2"
+                    >
+
+                        {% csrf_token %}
+
+                        <button
+                            class="btn btn-success btn-sm w-100"
+                        >
+
+                            Approve Return
+
+                        </button>
+
+                    </form>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}

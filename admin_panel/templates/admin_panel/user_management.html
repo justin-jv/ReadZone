@@ -1,0 +1,915 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <h1 class="mb-4">
+        User Management
+    </h1>
+
+    <form method="GET" class="row mb-4">
+
+        <div class="col-md-6">
+
+            <input
+                type="text"
+                name="search"
+                class="form-control"
+                placeholder="Search by Name, Email or Mobile"
+                value="{{ search_query }}"
+            >
+
+        </div>
+
+        <div class="col-md-2">
+
+            <button
+                type="submit"
+                class="btn btn-primary w-100"
+            >
+                Search
+            </button>
+
+        </div>
+
+        <div class="col-md-2">
+
+            <a
+                href="{% url 'user_management' %}"
+                class="btn btn-secondary w-100"
+            >
+                Clear
+            </a>
+
+        </div>
+
+    </form>
+
+    <div class="table-responsive">
+
+        <table class="table table-bordered table-hover">
+
+            <thead class="table-dark">
+
+                <tr>
+
+                    <th>
+                        Customer Name
+                    </th>
+
+                    <th>
+                        Email
+                    </th>
+
+                    <th>
+                        Mobile
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Actions
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for user in page_obj %}
+
+                <tr>
+
+                    <td>
+                        {{ user.first_name }}
+                        {{ user.last_name }}
+                    </td>
+
+                    <td>
+                        {{ user.email }}
+                    </td>
+
+                    <td>
+                        {{ user.mobile_number }}
+                    </td>
+
+                    <td>
+
+                        {% if user.is_blocked %}
+
+                            <span class="badge bg-danger">
+                                Blocked
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-success">
+                                Active
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        {% if user.is_blocked %}
+
+                            <a
+                                href="{% url 'unblock_user' user.id %}"
+                                class="btn btn-success btn-sm"
+                                onclick="return confirm('Unblock this user?')"
+                            >
+                                Unblock
+                            </a>
+
+                        {% else %}
+
+                            <a
+                                href="{% url 'block_user' user.id %}"
+                                class="btn btn-danger btn-sm"
+                                onclick="return confirm('Block this user?')"
+                            >
+                                Block
+                            </a>
+
+                        {% endif %}
+
+                        <a
+                            href="{% url 'delete_user' user.id %}"
+                            class="btn btn-dark btn-sm"
+                            onclick="return confirm('This action cannot be undone. Delete this user permanently?')"
+                        >
+                            Delete
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="5" class="text-center">
+                        No users found.
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="mt-4 text-center">
+
+        {% if page_obj.has_previous %}
+
+            <a
+                href="?page=1"
+                class="btn btn-outline-primary btn-sm"
+            >
+                First
+            </a>
+
+            <a
+                href="?page={{ page_obj.previous_page_number }}"
+                class="btn btn-outline-primary btn-sm"
+            >
+                Previous
+            </a>
+
+        {% endif %}
+
+        <span class="mx-3">
+
+            Page {{ page_obj.number }}
+            of
+            {{ page_obj.paginator.num_pages }}
+
+        </span>
+
+        {% if page_obj.has_next %}
+
+            <a
+                href="?page={{ page_obj.next_page_number }}"
+                class="btn btn-outline-primary btn-sm"
+            >
+                Next
+            </a>
+
+            <a
+                href="?page={{ page_obj.paginator.num_pages }}"
+                class="btn btn-outline-primary btn-sm"
+            >
+                Last
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% comment %} PERFECT BUT NEEDS SOME CHANGE {% endcomment %}
+
+{% comment %} <!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Verse & Volume | User Management Console</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+    --bg-mint-main:#f2f7f5;
+    --bg-mint-panel:rgba(224,235,231,.72);
+    --border-mint:rgba(17,51,38,.08);
+
+    --text-forest:#113326;
+    --text-muted-sage:#5c756b;
+
+    --accent-emerald:#198754;
+    --accent-grad:linear-gradient(135deg,#1b734e 0%,#115337 100%);
+
+    --danger-rose:#b91c1c;
+
+    --shadow-soft:0 12px 36px rgba(17,51,38,.04);
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    background:var(--bg-mint-main);
+    color:var(--text-forest);
+    font-family:'Plus Jakarta Sans',sans-serif;
+    min-height:100vh;
+}
+
+.font-display{
+    font-family:'Cinzel',serif;
+}
+
+/* ===== Background ===== */
+
+body::before{
+    content:'';
+    position:fixed;
+    width:500px;
+    height:500px;
+    background:#d9f5e8;
+    border-radius:50%;
+    filter:blur(120px);
+    top:-150px;
+    left:-150px;
+    z-index:-1;
+}
+
+body::after{
+    content:'';
+    position:fixed;
+    width:500px;
+    height:500px;
+    background:#ecfdf5;
+    border-radius:50%;
+    filter:blur(120px);
+    bottom:-150px;
+    right:-150px;
+    z-index:-1;
+}
+
+/* ===== Glass Panels ===== */
+
+.admin-card-glass{
+    background:var(--bg-mint-panel);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border:1px solid var(--border-mint);
+    border-radius:24px;
+    box-shadow:var(--shadow-soft);
+}
+
+/* ===== Metric Cards ===== */
+
+.metric-card{
+    padding:24px;
+    border-radius:20px;
+    background:rgba(255,255,255,.45);
+    border:1px solid var(--border-mint);
+    transition:.3s ease;
+    height:100%;
+}
+
+.metric-card:hover{
+    transform:translateY(-4px);
+}
+
+.metric-label{
+    font-size:.72rem;
+    text-transform:uppercase;
+    letter-spacing:1.2px;
+    color:var(--text-muted-sage);
+    font-weight:700;
+}
+
+.metric-value{
+    font-size:2rem;
+    font-weight:700;
+    margin-top:6px;
+}
+
+/* ===== Search ===== */
+
+.form-control-mint{
+    background:rgba(255,255,255,.65);
+    border:1px solid var(--border-mint);
+    border-radius:14px;
+    padding:12px 16px;
+}
+
+.form-control-mint:focus{
+    box-shadow:none;
+    border-color:#113326;
+}
+
+.btn-emerald-pill{
+    border:none;
+    border-radius:999px;
+    background:var(--accent-grad);
+    color:white;
+    font-weight:600;
+    padding:12px 24px;
+    transition:.25s;
+    text-decoration:none;
+}
+
+.btn-emerald-pill:hover{
+    color:white;
+    transform:translateY(-2px);
+}
+
+.btn-clear{
+    border-radius:999px;
+    padding:12px 24px;
+}
+
+/* ===== Table ===== */
+
+.table-wrapper{
+    background:rgba(255,255,255,.45);
+    border-radius:18px;
+    overflow:hidden;
+}
+
+.table-premium{
+    margin:0;
+}
+
+.table-premium th{
+    background:rgba(17,51,38,.04);
+    color:var(--text-forest);
+    font-size:.72rem;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    font-weight:700;
+    padding:18px;
+    border:none;
+}
+
+.table-premium td{
+    padding:18px;
+    vertical-align:middle;
+    border-color:var(--border-mint);
+}
+
+.table-premium tbody tr{
+    transition:.25s;
+}
+
+.table-premium tbody tr:hover{
+    background:rgba(255,255,255,.55);
+}
+
+/* ===== User Identity ===== */
+
+.user-avatar{
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    background:var(--accent-grad);
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size:1rem;
+}
+
+.user-email{
+    color:var(--text-muted-sage);
+    font-size:.82rem;
+}
+
+/* ===== Status ===== */
+
+.status-pill{
+    border-radius:999px;
+    padding:8px 14px;
+    font-size:.72rem;
+    font-weight:700;
+}
+
+.status-active{
+    background:#dcfce7;
+    color:#15803d;
+}
+
+.status-blocked{
+    background:#fee2e2;
+    color:#b91c1c;
+}
+
+/* ===== Actions ===== */
+
+.action-chip{
+    border-radius:999px;
+    padding:8px 14px;
+    font-size:.72rem;
+    font-weight:700;
+    text-decoration:none;
+    transition:.25s;
+}
+
+.action-chip:hover{
+    transform:translateY(-2px);
+}
+
+.block-chip{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.unblock-chip{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.delete-chip{
+    background:#111827;
+    color:white;
+}
+
+/* ===== Analytics ===== */
+
+.analytics-panel{
+    height:400px;
+    border-radius:20px;
+    overflow:hidden;
+    background:rgba(17,51,38,.03);
+    border:1px solid var(--border-mint);
+}
+
+#threejs-user-canvas{
+    width:100%;
+    height:100%;
+}
+
+/* ===== Pagination ===== */
+
+.pagination-pill{
+    border-radius:999px;
+}
+
+/* ===== Mobile Cards ===== */
+
+.mobile-users{
+    display:none;
+}
+
+.mobile-user-card{
+    background:rgba(255,255,255,.45);
+    border:1px solid var(--border-mint);
+    border-radius:20px;
+    padding:18px;
+}
+
+@media(max-width:991px){
+
+    .desktop-table{
+        display:none;
+    }
+
+    .mobile-users{
+        display:block;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container-fluid py-5 px-lg-5">
+
+```
+<!-- Header -->
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+    <div>
+        <h1 class="font-display fw-bold mb-1">
+            User Management
+        </h1>
+
+        <p class="text-muted small mb-0">
+            Customer access governance, moderation and account telemetry.
+        </p>
+    </div>
+
+</div>
+
+<!-- Metrics -->
+
+<div class="row g-3 mb-4">
+
+    <div class="col-lg-3 col-md-6">
+        <div class="metric-card">
+            <div class="metric-label">Total Users</div>
+            <div class="metric-value">{{ total_users }}</div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="metric-card">
+            <div class="metric-label">Active Users</div>
+            <div class="metric-value">{{ active_users }}</div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="metric-card">
+            <div class="metric-label">Blocked Users</div>
+            <div class="metric-value">{{ blocked_users }}</div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="metric-card">
+            <div class="metric-label">New Accounts</div>
+            <div class="metric-value">{{ new_users }}</div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Search -->
+
+<div class="admin-card-glass p-4 mb-4">
+
+    <form method="GET" class="row g-3 align-items-end">
+
+        <div class="col-lg-8">
+            <label class="small fw-bold text-uppercase text-muted mb-2">
+                Search Registry
+            </label>
+
+            <input
+                type="text"
+                name="search"
+                class="form-control form-control-mint"
+                placeholder="Search by name, email or mobile..."
+                value="{{ search_query }}"
+            >
+        </div>
+
+        <div class="col-lg-2">
+            <button class="btn btn-emerald-pill w-100">
+                Search
+            </button>
+        </div>
+
+        <div class="col-lg-2">
+            <a href="{% url 'user_management' %}" class="btn btn-outline-secondary btn-clear w-100">
+                Clear
+            </a>
+        </div>
+
+    </form>
+
+</div>
+
+<div class="row g-4">
+
+    <!-- Table -->
+
+    <div class="col-xl-8">
+
+        <div class="admin-card-glass p-0 overflow-hidden">
+
+            <div class="table-wrapper desktop-table">
+
+                <div class="table-responsive">
+
+                    <table class="table table-premium">
+
+                        <thead>
+
+                            <tr>
+                                <th>User</th>
+                                <th>Mobile</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                        {% for user in page_obj %}
+
+                            <tr>
+
+                                <td>
+
+                                    <div class="d-flex align-items-center gap-3">
+
+                                        <div class="user-avatar">
+                                            {{ user.first_name|first }}
+                                        </div>
+
+                                        <div>
+
+                                            <div class="fw-bold">
+                                                {{ user.first_name }} {{ user.last_name }}
+                                            </div>
+
+                                            <div class="user-email">
+                                                {{ user.email }}
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                                <td>{{ user.mobile_number }}</td>
+
+                                <td>
+
+                                    {% if user.is_blocked %}
+                                        <span class="status-pill status-blocked">
+                                            Blocked
+                                        </span>
+                                    {% else %}
+                                        <span class="status-pill status-active">
+                                            Active
+                                        </span>
+                                    {% endif %}
+
+                                </td>
+
+                                <td class="text-end">
+
+                                    <div class="d-inline-flex gap-2">
+
+                                        {% if user.is_blocked %}
+
+                                        <a href="{% url 'unblock_user' user.id %}"
+                                           class="action-chip unblock-chip">
+                                            Unblock
+                                        </a>
+
+                                        {% else %}
+
+                                        <a href="{% url 'block_user' user.id %}"
+                                           class="action-chip block-chip">
+                                            Block
+                                        </a>
+
+                                        {% endif %}
+
+                                        <a href="{% url 'delete_user' user.id %}"
+                                           class="action-chip delete-chip">
+                                            Delete
+                                        </a>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+                                <td colspan="4" class="text-center py-5">
+                                    No users found.
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+            <!-- Mobile Cards -->
+
+            <div class="mobile-users p-3">
+
+                {% for user in page_obj %}
+
+                <div class="mobile-user-card mb-3">
+
+                    <div class="d-flex gap-3">
+
+                        <div class="user-avatar">
+                            {{ user.first_name|first }}
+                        </div>
+
+                        <div>
+
+                            <div class="fw-bold">
+                                {{ user.first_name }}
+                                {{ user.last_name }}
+                            </div>
+
+                            <small class="text-muted">
+                                {{ user.email }}
+                            </small>
+
+                            <div class="mt-2">
+                                {{ user.mobile_number }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            <div class="py-4 text-center border-top">
+
+                {% if page_obj.has_previous %}
+                <a href="?page=1" class="btn btn-outline-dark pagination-pill">First</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline-dark pagination-pill">Previous</a>
+                {% endif %}
+
+                <span class="mx-3 fw-bold text-muted">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline-dark pagination-pill">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline-dark pagination-pill">Last</a>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Analytics -->
+
+    <div class="col-xl-4">
+
+        <div class="admin-card-glass p-4 h-100">
+
+            <h4 class="font-display mb-1">
+                User Analytics
+            </h4>
+
+            <p class="small text-muted">
+                Live customer registry visualization.
+            </p>
+
+            <div class="analytics-panel">
+                <div id="threejs-user-canvas"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+
+const container = document.getElementById("threejs-user-canvas");
+
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(
+    60,
+    container.clientWidth/container.clientHeight,
+    0.1,
+    1000
+);
+
+camera.position.z = 5;
+
+const renderer = new THREE.WebGLRenderer({
+    alpha:true,
+    antialias:true
+});
+
+renderer.setSize(
+    container.clientWidth,
+    container.clientHeight
+);
+
+container.appendChild(renderer.domElement);
+
+const light = new THREE.PointLight(0xffffff,1.5);
+light.position.set(5,5,5);
+scene.add(light);
+
+const group = new THREE.Group();
+
+for(let i=0;i<40;i++){
+
+    const sphere = new THREE.Mesh(
+        new THREE.SphereGeometry(.08,16,16),
+        new THREE.MeshStandardMaterial({
+            color:i%2 ? 0x198754 : 0x113326
+        })
+    );
+
+    sphere.position.set(
+        (Math.random()-0.5)*5,
+        (Math.random()-0.5)*5,
+        (Math.random()-0.5)*5
+    );
+
+    group.add(sphere);
+}
+
+scene.add(group);
+
+function animate(){
+
+    requestAnimationFrame(animate);
+
+    group.rotation.y += .002;
+    group.rotation.x += .001;
+
+    renderer.render(scene,camera);
+}
+
+animate();
+
+window.addEventListener("resize",()=>{
+
+    camera.aspect =
+        container.clientWidth /
+        container.clientHeight;
+
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(
+        container.clientWidth,
+        container.clientHeight
+    );
+});
+
+</script>
+
+</body>
+</html> {% endcomment %}
+

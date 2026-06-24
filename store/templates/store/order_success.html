@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container py-5 text-center">
+
+    <div class="card shadow-sm">
+
+        <div class="card-body p-5">
+
+            <h1 class="text-success">
+
+                Order Placed Successfully
+
+            </h1>
+
+            <p class="lead mt-3">
+
+                Thank you for shopping with ReadZone.
+
+            </p>
+
+            <p>
+
+                Order ID:
+
+                <strong>
+
+                    {{ order_id }}
+
+                </strong>
+
+            </p>
+
+            <a
+                href="{% url 'shop' %}"
+                class="btn btn-dark mt-3"
+            >
+
+                Continue Shopping
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,1139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'store/css/product_detail.css' %}">
+
+<style>
+:root{
+--pd-card:rgba(255,255,255,.72);
+--pd-border:rgba(31,45,40,.08);
+--pd-primary:#23473b;
+--pd-accent:#c49a5a;
+}
+
+.product-info-card,
+.description-card,
+.related-card{
+background:var(--pd-card);
+backdrop-filter:blur(18px);
+border:1px solid var(--pd-border);
+border-radius:28px;
+box-shadow:0 12px 35px rgba(0,0,0,.05);
+}
+
+.product-info-card{padding:2rem;}
+.description-card{padding:2rem;}
+.related-card{overflow:hidden;transition:.35s;}
+.related-card:hover,
+.product-info-card:hover{
+transform:translateY(-4px);
+}
+
+.main-image-container{
+background:var(--pd-card);
+padding:1rem;
+border-radius:28px;
+border:1px solid var(--pd-border);
+position:relative;
+}
+
+.main-book-image{
+width:100%;
+border-radius:20px;
+object-fit:cover;
+}
+
+.thumbnail-gallery{
+display:flex;
+gap:.75rem;
+flex-wrap:wrap;
+}
+
+.thumbnail-image{
+width:72px;
+height:90px;
+object-fit:cover;
+border-radius:14px;
+cursor:pointer;
+border:2px solid transparent;
+}
+
+.active-thumb{
+border-color:var(--pd-primary);
+}
+
+.product-title{
+font-size:clamp(2rem,4vw,3rem);
+font-weight:800;
+color:var(--pd-primary);
+}
+
+.product-author{color:#66756e;}
+
+.info-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:1rem;
+}
+
+.new-price{
+font-size:2rem;
+font-weight:800;
+color:var(--pd-primary);
+}
+
+.old-price{
+text-decoration:line-through;
+color:#888;
+margin-right:10px;
+}
+
+.discount-badge{
+background:#dcfce7;
+color:#166534;
+padding:.45rem .8rem;
+border-radius:999px;
+font-weight:700;
+}
+
+.stock-available{
+background:#dcfce7;
+color:#166534;
+padding:.5rem .85rem;
+border-radius:999px;
+}
+
+.stock-unavailable{
+background:#fee2e2;
+color:#991b1b;
+padding:.5rem .85rem;
+border-radius:999px;
+}
+
+.wishlist-detail-btn{
+display:inline-flex;
+align-items:center;
+gap:.5rem;
+padding:.9rem 1.2rem;
+border-radius:999px;
+background:white;
+text-decoration:none;
+color:#e11d48;
+font-weight:600;
+}
+
+.action-buttons .btn-dark,
+.related-body .btn-dark{
+background:linear-gradient(135deg,#23473b,#3f6f5d);
+border:none;
+border-radius:16px;
+}
+
+.related-image{
+width:100%;
+height:260px;
+object-fit:cover;
+}
+
+.related-body{padding:1rem;}
+
+.zoom-result{
+position:absolute;
+right:-320px;
+top:0;
+width:300px;
+height:300px;
+border-radius:20px;
+display:none;
+border:1px solid var(--pd-border);
+background-repeat:no-repeat;
+background-color:white;
+z-index:10;
+}
+
+@media(max-width:991px){
+.zoom-result{display:none!important;}
+.related-image{height:220px;}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- KEEP YOUR EXISTING PRODUCT DETAIL HTML EXACTLY AS PROVIDED -->
+<!-- This file only supplies the redesign CSS so no functionality is changed -->
+
+<div class="product-detail-page">
+
+    <div class="container py-4">
+
+        <!-- BREADCRUMB -->
+
+        <nav class="mb-4">
+
+            <ol class="breadcrumb">
+
+                <li class="breadcrumb-item">
+
+                    <a href="{% url 'landing_page' %}">
+                        Home
+                    </a>
+
+                </li>
+
+                <li class="breadcrumb-item">
+
+                    <a href="{% url 'shop' %}">
+                        Shop
+                    </a>
+
+                </li>
+
+                <li class="breadcrumb-item active">
+
+                    {{ product.title }}
+
+                </li>
+
+            </ol>
+
+        </nav>
+
+        <div class="row g-5">
+
+            <!-- IMAGES -->
+
+            <div class="col-lg-5">
+
+                <div
+                    class="main-image-container"
+                    id="imageContainer"
+                >
+
+                    {% if product.cover_image %}
+
+                    <img
+                        id="mainBookImage"
+                        src="{{ product.cover_image.url }}"
+                        class="main-book-image"
+                        alt="{{ product.title }}"
+                    >
+
+                    {% else %}
+
+                    <img
+                        id="mainBookImage"
+                        src="{% static 'store/images/book_placeholder.jpg' %}"
+                        class="main-book-image"
+                        alt="No Image"
+                    >
+
+                    {% endif %}
+
+                    <div
+                        id="zoomResult"
+                        class="zoom-result"
+                    ></div>
+
+                </div>
+                {% if product.images.all %}
+
+                <div class="thumbnail-gallery mt-3">
+
+                    {% if product.cover_image %}
+
+                    <img
+                        src="{{ product.cover_image.url }}"
+                        class="thumbnail-image active-thumb"
+                        onclick="changeImage(this)"
+                    >
+
+                    {% endif %}
+
+                    {% for image in product.images.all %}
+
+                    <img
+                        src="{{ image.image.url }}"
+                        class="thumbnail-image"
+                        onclick="changeImage(this)"
+                    >
+
+                    {% endfor %}
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+            <!-- DETAILS -->
+
+            <div class="col-lg-7">
+
+                <div class="product-info-card">
+
+                    <h1 class="product-title">
+
+                        {{ product.title }}
+
+                    </h1>
+
+                    <p class="product-author">
+
+                        by {{ product.author }}
+
+                    </p>
+
+                    <div class="info-grid">
+
+                        <div>
+
+                            <strong>Category:</strong>
+
+                            {{ product.category.name }}
+
+                        </div>
+
+                        <div>
+
+                            <strong>Language:</strong>
+
+                            {{ product.language.name }}
+
+                        </div>
+
+                        <div>
+
+                            <strong>Publisher:</strong>
+
+                            {{ product.publisher }}
+
+                        </div>
+
+                        <div>
+
+                            <strong>Published:</strong>
+
+                            {{ product.publication_date }}
+
+                        </div>
+
+                        <div>
+
+                            <strong>ISBN:</strong>
+
+                            {{ product.isbn }}
+
+                        </div>
+
+                    </div>
+
+                    <hr>
+
+                    <!-- PRICE -->
+
+                    <div class="price-section">
+
+                        {% if product.sale_price %}
+
+                        <span class="old-price">
+
+                            ₹{{ product.regular_price }}
+
+                        </span>
+
+                        <span class="new-price">
+
+                            ₹{{ product.sale_price }}
+
+                        </span>
+
+                        <span class="discount-badge">
+
+                            {{ product.discount_percentage }}% OFF
+
+                        </span>
+
+                        {% else %}
+
+                        <span class="new-price">
+
+                            ₹{{ product.regular_price }}
+
+                        </span>
+
+                        {% endif %}
+
+                    </div>
+
+                    <!-- STOCK -->
+
+                    <div class="stock-section mt-4">
+
+                        {% if product.stock > 0 %}
+
+                        <span class="stock-available">
+
+                            In Stock 
+
+                        </span>
+
+                        {% else %}
+
+                        <span class="stock-unavailable">
+
+                            Out of Stock
+
+                        </span>
+
+                        {% endif %}
+
+                    </div>
+
+                    <!-- WISHLIST BUTTON-->
+
+                    <div class="wishlist-section mt-3">
+
+                        <a
+                            href="{% url 'toggle_wishlist' product.id %}"
+                            class="wishlist-detail-btn"
+                        >
+
+                            {% if is_wishlisted %}
+
+                                <i class="fas fa-heart"></i>
+
+                                Remove from Wishlist
+
+                            {% else %}
+
+                                <i class="far fa-heart"></i>
+
+                                Add to Wishlist
+
+                            {% endif %}
+
+                        </a>
+
+                    </div>
+
+                    <!-- ACTION BUTTONS -->
+
+                    <div class="action-buttons mt-4">
+
+                        {% if product.stock > 0 %}
+
+                        <a
+                            href="{% url 'add_to_cart' product.id %}"
+                            class="btn btn-dark btn-lg"
+                        >
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            Add to Cart
+                        </a>
+
+                        {% else %}
+
+                        <button
+                            class="btn btn-secondary btn-lg"
+                            disabled
+                        >
+                            Out of Stock
+                        </button>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- DESCRIPTION -->
+
+        <div class="description-card mt-5">
+
+            <h3>
+                About this Book
+            </h3>
+
+            <p>
+
+                {{ product.description|linebreaks }}
+
+            </p>
+
+        </div>
+
+        <!-- RELATED BOOKS -->
+
+        {% if related_products %}
+
+        <div class="related-books-section mt-5">
+
+            <h3 class="mb-4">
+
+                Related Books
+
+            </h3>
+
+            <div class="row g-4">
+
+                {% for book in related_products %}
+
+                <div class="col-6 col-md-4 col-lg-3">
+
+                    <div class="related-card">
+
+                        {% if book.cover_image %}
+
+                        <img
+                            src="{{ book.cover_image.url }}"
+                            class="related-image"
+                        >
+
+                        {% else %}
+
+                        <img
+                            src="{% static 'store/images/book_placeholder.jpg' %}"
+                            class="related-image"
+                        >
+
+                        {% endif %}
+
+                        <div class="related-body">
+
+                            <h6>
+
+                                {{ book.title }}
+
+                            </h6>
+
+                            <a
+                                href="{% url 'product_detail' book.slug %}"
+                                class="btn btn-dark btn-sm w-100"
+                            >
+                                View Book
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- KEEP YOUR EXISTING JS EXACTLY AS PROVIDED -->
+
+
+<script>
+
+function changeImage(element)
+{
+    const mainImage =
+        document.getElementById(
+            'mainBookImage'
+        );
+
+    mainImage.src = element.src;
+
+    document
+        .querySelectorAll(
+            '.thumbnail-image'
+        )
+        .forEach(
+            thumb =>
+            thumb.classList.remove(
+                'active-thumb'
+            )
+        );
+
+    element.classList.add(
+        'active-thumb'
+    );
+}
+
+const image =
+    document.getElementById(
+        'mainBookImage'
+    );
+
+const zoomResult =
+    document.getElementById(
+        'zoomResult'
+    );
+
+if (
+    image &&
+    window.innerWidth >= 992
+)
+{
+
+    image.addEventListener(
+        'mousemove',
+        zoomImage
+    );
+
+    image.addEventListener(
+        'mouseenter',
+        function ()
+        {
+            zoomResult.style.display =
+                'block';
+        }
+    );
+
+    image.addEventListener(
+        'mouseleave',
+        function ()
+        {
+            zoomResult.style.display =
+                'none';
+        }
+    );
+
+}
+
+function zoomImage(e)
+{
+
+    const rect =
+        image.getBoundingClientRect();
+
+    const x =
+        e.clientX - rect.left;
+
+    const y =
+        e.clientY - rect.top;
+
+    const xPercent =
+        (x / rect.width) * 100;
+
+    const yPercent =
+        (y / rect.height) * 100;
+
+    zoomResult.style.backgroundImage =
+        `url('${image.src}')`;
+
+    zoomResult.style.backgroundSize =
+        '250%';
+
+    zoomResult.style.backgroundPosition =
+        `${xPercent}% ${yPercent}%`;
+
+}
+
+</script>
+
+
+{% endblock %}
+
+
+
+
+
+{% comment %} {% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{% static 'store/css/product_detail.css' %}"
+>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="product-detail-page">
+
+    <div class="container py-4">
+
+        <!-- BREADCRUMB -->
+
+        <nav class="mb-4">
+
+            <ol class="breadcrumb">
+
+                <li class="breadcrumb-item">
+
+                    <a href="{% url 'landing_page' %}">
+                        Home
+                    </a>
+
+                </li>
+
+                <li class="breadcrumb-item">
+
+                    <a href="{% url 'shop' %}">
+                        Shop
+                    </a>
+
+                </li>
+
+                <li class="breadcrumb-item active">
+
+                    {{ product.title }}
+
+                </li>
+
+            </ol>
+
+        </nav>
+
+        <div class="row g-5">
+
+            <!-- IMAGES -->
+
+            <div class="col-lg-5">
+
+                <div
+                    class="main-image-container"
+                    id="imageContainer"
+                >
+
+                    {% if product.cover_image %}
+
+                    <img
+                        id="mainBookImage"
+                        src="{{ product.cover_image.url }}"
+                        class="main-book-image"
+                        alt="{{ product.title }}"
+                    >
+
+                    {% else %}
+
+                    <img
+                        id="mainBookImage"
+                        src="{% static 'store/images/book_placeholder.jpg' %}"
+                        class="main-book-image"
+                        alt="No Image"
+                    >
+
+                    {% endif %}
+
+                    <div
+                        id="zoomResult"
+                        class="zoom-result"
+                    ></div>
+
+                </div>
+                {% if product.images.all %}
+
+                <div class="thumbnail-gallery mt-3">
+
+                    {% if product.cover_image %}
+
+                    <img
+                        src="{{ product.cover_image.url }}"
+                        class="thumbnail-image active-thumb"
+                        onclick="changeImage(this)"
+                    >
+
+                    {% endif %}
+
+                    {% for image in product.images.all %}
+
+                    <img
+                        src="{{ image.image.url }}"
+                        class="thumbnail-image"
+                        onclick="changeImage(this)"
+                    >
+
+                    {% endfor %}
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+            <!-- DETAILS -->
+
+            <div class="col-lg-7">
+
+                <div class="product-info-card">
+
+                    <h1 class="product-title">
+
+                        {{ product.title }}
+
+                    </h1>
+
+                    <p class="product-author">
+
+                        by {{ product.author }}
+
+                    </p>
+
+                    <div class="info-grid">
+
+                        <div>
+
+                            <strong>Category:</strong>
+
+                            {{ product.category.name }}
+
+                        </div>
+
+                        <div>
+
+                            <strong>Language:</strong>
+
+                            {{ product.language.name }}
+
+                        </div>
+
+                        <div>
+
+                            <strong>Publisher:</strong>
+
+                            {{ product.publisher }}
+
+                        </div>
+
+                        <div>
+
+                            <strong>Published:</strong>
+
+                            {{ product.publication_date }}
+
+                        </div>
+
+                        <div>
+
+                            <strong>ISBN:</strong>
+
+                            {{ product.isbn }}
+
+                        </div>
+
+                    </div>
+
+                    <hr>
+
+                    <!-- PRICE -->
+
+                    <div class="price-section">
+
+                        {% if product.sale_price %}
+
+                        <span class="old-price">
+
+                            ₹{{ product.regular_price }}
+
+                        </span>
+
+                        <span class="new-price">
+
+                            ₹{{ product.sale_price }}
+
+                        </span>
+
+                        <span class="discount-badge">
+
+                            {{ product.discount_percentage }}% OFF
+
+                        </span>
+
+                        {% else %}
+
+                        <span class="new-price">
+
+                            ₹{{ product.regular_price }}
+
+                        </span>
+
+                        {% endif %}
+
+                    </div>
+
+                    <!-- STOCK -->
+
+                    <div class="stock-section mt-4">
+
+                        {% if product.stock > 0 %}
+
+                        <span class="stock-available">
+
+                            In Stock 
+
+                        </span>
+
+                        {% else %}
+
+                        <span class="stock-unavailable">
+
+                            Out of Stock
+
+                        </span>
+
+                        {% endif %}
+
+                    </div>
+
+                    <!-- WISHLIST BUTTON-->
+
+                    <div class="wishlist-section mt-3">
+
+                        <a
+                            href="{% url 'toggle_wishlist' product.id %}"
+                            class="wishlist-detail-btn"
+                        >
+
+                            {% if is_wishlisted %}
+
+                                <i class="fas fa-heart"></i>
+
+                                Remove from Wishlist
+
+                            {% else %}
+
+                                <i class="far fa-heart"></i>
+
+                                Add to Wishlist
+
+                            {% endif %}
+
+                        </a>
+
+                    </div>
+
+                    <!-- ACTION BUTTONS -->
+
+                    <div class="action-buttons mt-4">
+
+                        {% if product.stock > 0 %}
+
+                        <a
+                            href="{% url 'add_to_cart' product.id %}"
+                            class="btn btn-dark btn-lg"
+                        >
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            Add to Cart
+                        </a>
+
+                        {% else %}
+
+                        <button
+                            class="btn btn-secondary btn-lg"
+                            disabled
+                        >
+                            Out of Stock
+                        </button>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- DESCRIPTION -->
+
+        <div class="description-card mt-5">
+
+            <h3>
+                About this Book
+            </h3>
+
+            <p>
+
+                {{ product.description|linebreaks }}
+
+            </p>
+
+        </div>
+
+        <!-- RELATED BOOKS -->
+
+        {% if related_products %}
+
+        <div class="related-books-section mt-5">
+
+            <h3 class="mb-4">
+
+                Related Books
+
+            </h3>
+
+            <div class="row g-4">
+
+                {% for book in related_products %}
+
+                <div class="col-6 col-md-4 col-lg-3">
+
+                    <div class="related-card">
+
+                        {% if book.cover_image %}
+
+                        <img
+                            src="{{ book.cover_image.url }}"
+                            class="related-image"
+                        >
+
+                        {% else %}
+
+                        <img
+                            src="{% static 'store/images/book_placeholder.jpg' %}"
+                            class="related-image"
+                        >
+
+                        {% endif %}
+
+                        <div class="related-body">
+
+                            <h6>
+
+                                {{ book.title }}
+
+                            </h6>
+
+                            <a
+                                href="{% url 'product_detail' book.slug %}"
+                                class="btn btn-dark btn-sm w-100"
+                            >
+                                View Book
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+
+function changeImage(element)
+{
+    const mainImage =
+        document.getElementById(
+            'mainBookImage'
+        );
+
+    mainImage.src = element.src;
+
+    document
+        .querySelectorAll(
+            '.thumbnail-image'
+        )
+        .forEach(
+            thumb =>
+            thumb.classList.remove(
+                'active-thumb'
+            )
+        );
+
+    element.classList.add(
+        'active-thumb'
+    );
+}
+
+const image =
+    document.getElementById(
+        'mainBookImage'
+    );
+
+const zoomResult =
+    document.getElementById(
+        'zoomResult'
+    );
+
+if (
+    image &&
+    window.innerWidth >= 992
+)
+{
+
+    image.addEventListener(
+        'mousemove',
+        zoomImage
+    );
+
+    image.addEventListener(
+        'mouseenter',
+        function ()
+        {
+            zoomResult.style.display =
+                'block';
+        }
+    );
+
+    image.addEventListener(
+        'mouseleave',
+        function ()
+        {
+            zoomResult.style.display =
+                'none';
+        }
+    );
+
+}
+
+function zoomImage(e)
+{
+
+    const rect =
+        image.getBoundingClientRect();
+
+    const x =
+        e.clientX - rect.left;
+
+    const y =
+        e.clientY - rect.top;
+
+    const xPercent =
+        (x / rect.width) * 100;
+
+    const yPercent =
+        (y / rect.height) * 100;
+
+    zoomResult.style.backgroundImage =
+        `url('${image.src}')`;
+
+    zoomResult.style.backgroundSize =
+        '250%';
+
+    zoomResult.style.backgroundPosition =
+        `${xPercent}% ${yPercent}%`;
+
+}
+
+</script>
+{% endblock %} {% endcomment %}

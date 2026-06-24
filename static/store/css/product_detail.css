@@ -1,0 +1,266 @@
+.product-detail-page {
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+/* =========================
+   IMAGE SECTION
+========================= */
+
+.main-image-container {
+    background: white;
+    border-radius: 20px;
+
+    position: relative;
+
+    overflow: visible;
+
+    box-shadow: 0 10px 30px rgba(0,0,0,.06);
+}
+
+.main-book-image {
+    width: 100%;
+    height: 600px;
+    object-fit: cover;
+    display: block;
+}
+
+.thumbnail-gallery {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.thumbnail-image {
+    width: 80px;
+    height: 100px;
+    object-fit: cover;
+    cursor: pointer;
+    border-radius: 10px;
+    border: 2px solid transparent;
+}
+
+.active-thumb {
+    border-color: #111827;
+}
+
+/* =========================
+   DEBUG ZOOM PANEL
+========================= */
+
+.zoom-result {
+
+    display: none;
+
+    position: absolute;
+
+    top: 0;
+
+    left: calc(100% + 20px);
+
+    width: 350px;
+
+    height: 350px;
+
+    border-radius: 15px;
+
+    background-repeat: no-repeat;
+
+    background-color: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.15);
+
+    z-index: 99999;
+}
+
+/* =========================
+   PRODUCT INFO
+========================= */
+
+.product-info-card {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.06);
+}
+
+.product-title {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.product-author {
+    color: #64748b;
+    margin-bottom: 25px;
+}
+
+.info-grid {
+    display: grid;
+    gap: 12px;
+}
+
+/* =========================
+   PRICE
+========================= */
+
+.price-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.old-price {
+    text-decoration: line-through;
+    color: #94a3b8;
+    font-size: 1.1rem;
+}
+
+.new-price {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.discount-badge {
+    background: #16a34a;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+/* =========================
+   STOCK
+========================= */
+
+.stock-available {
+    color: #16a34a;
+    font-weight: 700;
+}
+
+.stock-unavailable {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+/* =========================
+   DESCRIPTION
+========================= */
+
+.description-card,
+.related-books-section {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.06);
+}
+
+/* =========================
+   RELATED BOOKS
+========================= */
+
+.related-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    height: 100%;
+    box-shadow: 0 8px 20px rgba(0,0,0,.05);
+}
+
+.related-image {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+.related-body {
+    padding: 15px;
+}
+
+.related-body h6 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =========================
+   TABLET
+========================= */
+
+@media (max-width: 991px) {
+
+    .main-book-image {
+        height: 450px;
+    }
+
+    .zoom-result {
+        display: none !important;
+    }
+
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 576px) {
+
+    .product-title {
+        font-size: 1.4rem;
+    }
+
+    .main-book-image {
+        height: 350px;
+    }
+
+    .new-price {
+        font-size: 1.5rem;
+    }
+
+}
+
+/* =========================
+   WISHLIST BUTTON
+========================= */
+
+.wishlist-detail-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 12px 20px;
+
+    border-radius: 12px;
+
+    background: #fff;
+
+    border: 1px solid #e5e7eb;
+
+    text-decoration: none;
+
+    color: #dc2626;
+
+    font-weight: 600;
+
+    transition: all .3s ease;
+}
+
+.wishlist-detail-btn:hover {
+
+    background: #fff5f5;
+
+    color: #dc2626;
+
+    transform: translateY(-2px);
+}
+
+.wishlist-detail-btn i {
+
+    font-size: 1.1rem;
+}

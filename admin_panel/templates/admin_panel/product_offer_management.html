@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between mb-4">
+
+        <h2>
+            Product Offers
+        </h2>
+
+        <a
+            href="{% url 'add_product_offer' %}"
+            class="btn btn-dark"
+        >
+            Add Product Offer
+        </a>
+
+    </div>
+
+    <table class="table table-bordered">
+
+        <thead>
+
+            <tr>
+
+                <th>Product</th>
+
+                <th>Offer %</th>
+
+                <th>Valid From</th>
+
+                <th>Valid To</th>
+
+                <th>Status</th>
+
+                <th>Actions</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for offer in offers %}
+
+            <tr>
+
+                <td>
+                    {{ offer.product.title }}
+                </td>
+
+                <td>
+                    {{ offer.offer_percentage }}%
+                </td>
+
+                <td>
+                    {{ offer.valid_from }}
+                </td>
+
+                <td>
+                    {{ offer.valid_to }}
+                </td>
+
+                <td>
+
+                    {% if offer.valid_to < now %}
+
+                        <span class="badge bg-danger">
+                            Expired
+                        </span>
+
+                    {% elif offer.is_active %}
+
+                        <span class="badge bg-success">
+                            Active
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge bg-secondary">
+                            Inactive
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    <a
+                        href="{% url 'edit_product_offer' offer.id %}"
+                        class="btn btn-warning btn-sm"
+                    >
+                        Edit
+                    </a>
+
+                    <a
+                        href="{% url 'toggle_product_offer' offer.id %}"
+                        class="btn btn-dark btn-sm"
+                    >
+                        Toggle
+                    </a>
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+
+                <td colspan="6">
+                    No offers found.
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

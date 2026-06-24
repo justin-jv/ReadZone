@@ -1,0 +1,884 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h1>
+            Product Management
+        </h1>
+
+        <a
+            href="{% url 'add_product' %}"
+            class="btn btn-success"
+        >
+            Add Product
+        </a>
+
+    </div>
+
+    <form method="GET" class="row g-3 mb-4">
+
+        <div class="col-md-3">
+
+            <input
+                type="text"
+                name="search"
+                class="form-control"
+                placeholder="Search Product"
+                value="{{ search_query }}"
+            >
+
+        </div>
+
+        <div class="col-md-2">
+
+            <select
+                name="category"
+                class="form-select"
+            >
+
+                <option value="">
+                    All Categories
+                </option>
+
+                {% for category in categories %}
+
+                    <option
+                        value="{{ category.id }}"
+                        {% if category_filter == category.id|stringformat:"s" %}
+                        selected
+                        {% endif %}
+                    >
+                        {{ category.name }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+        <div class="col-md-2">
+
+            <select
+                name="language"
+                class="form-select"
+            >
+
+                <option value="">
+                    All Languages
+                </option>
+
+                {% for language in languages %}
+
+                    <option
+                        value="{{ language.id }}"
+                        {% if language_filter == language.id|stringformat:"s" %}
+                        selected
+                        {% endif %}
+                    >
+                        {{ language.name }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+        <div class="col-md-2">
+
+            <select
+                name="status"
+                class="form-select"
+            >
+
+                <option value="all"
+                    {% if status_filter == 'all' %}
+                    selected
+                    {% endif %}
+                >
+                    All
+                </option>
+
+                <option value="active"
+                    {% if status_filter == 'active' %}
+                    selected
+                    {% endif %}
+                >
+                    Active
+                </option>
+
+                <option value="inactive"
+                    {% if status_filter == 'inactive' %}
+                    selected
+                    {% endif %}
+                >
+                    Inactive
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="col-md-1">
+
+            <button
+                type="submit"
+                class="btn btn-primary w-100"
+            >
+                Go
+            </button>
+
+        </div>
+
+        <div class="col-md-2">
+
+            <a
+                href="{% url 'product_management' %}"
+                class="btn btn-secondary w-100"
+            >
+                Clear
+            </a>
+
+        </div>
+
+    </form>
+
+    <div class="table-responsive">
+
+        <table class="table table-bordered table-hover align-middle">
+
+            <thead class="table-dark">
+
+                <tr>
+
+                    <th>
+                        Image
+                    </th>
+
+                    <th>
+                        Title
+                    </th>
+
+                    <th>
+                        Author
+                    </th>
+
+                    <th>
+                        ISBN
+                    </th>
+
+                    <th>
+                        Category
+                    </th>
+
+                    <th>
+                        Language
+                    </th>
+
+                    <th>
+                        Price
+                    </th>
+
+                    <th>
+                        Stock
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Actions
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for product in page_obj %}
+
+                <tr>
+
+                    <td>
+
+                        {% if product.cover_image %}
+
+                            <img
+                                src="{{ product.cover_image.url }}"
+                                width="70"
+                                height="90"
+                                style="object-fit: cover;"
+                            >
+
+                        {% else %}
+
+                            No Image
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+                        {{ product.title }}
+                    </td>
+
+                    <td>
+                        {{ product.author }}
+                    </td>
+
+                    <td>
+                        {{ product.isbn }}
+                    </td>
+
+                    <td>
+                        {{ product.category.name }}
+                    </td>
+
+                    <td>
+                        {{ product.language.name }}
+                    </td>
+
+                    <td>
+
+                        {% if product.sale_price %}
+
+                            <div class="text-success fw-bold">
+
+                                ₹{{ product.sale_price }}
+
+                            </div>
+
+                            <small
+                                class="text-decoration-line-through text-muted"
+                            >
+                                ₹{{ product.regular_price }}
+                            </small>
+
+                        {% else %}
+
+                            ₹{{ product.regular_price }}
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        {% if product.stock == 0 %}
+
+                            <span class="badge bg-danger">
+                                Out of Stock
+                            </span>
+
+                        {% else %}
+
+                            {{ product.stock }}
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        {% if product.is_active %}
+
+                            <span class="badge bg-success">
+                                Active
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-danger">
+                                Inactive
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        <a
+                            href="{% url 'edit_product' product.id %}"
+                            class="btn btn-warning btn-sm mb-1"
+                        >
+                            Edit
+                        </a>
+
+                        <br>
+
+                        {% if product.is_active %}
+
+                            <a
+                                href="{% url 'deactivate_product' product.id %}"
+                                class="btn btn-danger btn-sm"
+                                onclick="return confirm('Deactivate this product?')"
+                            >
+                                Deactivate
+                            </a>
+
+                        {% else %}
+
+                            <a
+                                href="{% url 'activate_product' product.id %}"
+                                class="btn btn-success btn-sm"
+                                onclick="return confirm('Activate this product?')"
+                            >
+                                Activate
+                            </a>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="10" class="text-center">
+
+                        No products found.
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="mt-4 text-center">
+
+        {% if page_obj.has_previous %}
+
+            <a
+                href="?page=1"
+                class="btn btn-outline-primary btn-sm"
+            >
+                First
+            </a>
+
+            <a
+                href="?page={{ page_obj.previous_page_number }}"
+                class="btn btn-outline-primary btn-sm"
+            >
+                Previous
+            </a>
+
+        {% endif %}
+
+        <span class="mx-3">
+
+            Page {{ page_obj.number }}
+            of
+            {{ page_obj.paginator.num_pages }}
+
+        </span>
+
+        {% if page_obj.has_next %}
+
+            <a
+                href="?page={{ page_obj.next_page_number }}"
+                class="btn btn-outline-primary btn-sm"
+            >
+                Next
+            </a>
+
+            <a
+                href="?page={{ page_obj.paginator.num_pages }}"
+                class="btn btn-outline-primary btn-sm"
+            >
+                Last
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %} 
+
+
+
+{% comment %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verse & Volume | Product Management Console</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Premium Light Mint Pastel Theme Colors mapped uniformly */
+            --bg-mint-main: #f2f7f5;
+            --bg-mint-panel: rgba(224, 235, 231, 0.7);
+            --border-mint: rgba(17, 51, 38, 0.08);
+            --text-forest: #113326;
+            --text-muted-sage: #5c756b;
+            --accent-emerald: #198754;
+            --accent-grad: linear-gradient(135deg, #1b734e 0%, #115337 100%);
+            --danger-rose: #b91c1c;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-mint-main);
+            color: var(--text-forest);
+            min-height: 100vh;
+        }
+
+        .font-display {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Glassmorphism Structural Grid Panels */
+        .admin-card-glass {
+            background: var(--bg-mint-panel);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--border-mint);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 12px 36px rgba(17, 51, 38, 0.03);
+        }
+
+        /* Premium Form Control Tweaks */
+        .form-control-mint, .form-select {
+            background-color: rgba(255, 255, 255, 0.6);
+            border: 1px solid var(--border-mint);
+            color: var(--text-forest);
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 12px;
+            padding: 10px 16px;
+            transition: all 0.2s ease;
+        }
+
+        .form-control-mint:focus, .form-select:focus {
+            border-color: var(--text-forest);
+            box-shadow: none;
+            background-color: #ffffff;
+            color: var(--text-forest);
+        }
+
+        /* Custom Structured Overhaul on Datatable Ecosystem */
+        .admin-table-wrapper {
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid var(--border-mint);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .table-premium {
+            margin-bottom: 0;
+            vertical-align: middle;
+        }
+
+        .table-premium th {
+            background: rgba(17, 51, 38, 0.04);
+            color: var(--text-forest);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-mint);
+        }
+
+        .table-premium td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-mint);
+            color: var(--text-forest);
+            font-size: 0.85rem;
+        }
+
+        .table-premium tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Product Image Wrappers */
+        .product-thumbnail-frame {
+            border-radius: 8px;
+            border: 1px solid var(--border-mint);
+            object-fit: cover;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* 3D Visualizer Framework Host Container Layout */
+        .metrics-viewport-3d {
+            background: rgba(17, 51, 38, 0.03);
+            border: 1px solid var(--border-mint);
+            border-radius: 20px;
+            height: 380px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #threejs-admin-canvas {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+
+        #threejs-admin-canvas:active {
+            cursor: grabbing;
+        }
+
+        .btn-emerald-pill {
+            border-radius: 50px;
+            padding: 10px 24px;
+            font-weight: 600;
+            border: none;
+            background: var(--accent-grad);
+            color: white;
+            box-shadow: 0 6px 18px rgba(25, 135, 84, 0.15);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-emerald-pill:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px rgba(25, 135, 84, 0.25);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid py-5 px-xl-5">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="font-display fw-bold text-dark m-0">Product Management</h1>
+            <p class="text-muted small m-0">Real-time catalog control matrix and stock valuation telemetry.</p>
+        </div>
+        <a href="{% url 'add_product' %}" class="btn btn-emerald-pill text-uppercase">
+            <i class="bi bi-journal-plus me-2"></i>Add Product
+        </a>
+    </div>
+
+    <div class="admin-card-glass p-4 mb-4">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small fw-bold text-muted text-uppercase">Text Query</label>
+                <input type="text" name="search" class="form-control form-control-mint" placeholder="Search Title, Author, ISBN..." value="{{ search_query }}">
+            </div>
+            
+            <div class="col-md-2">
+                <label class="form-label small fw-bold text-muted text-uppercase">Category Filter</label>
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" {% if category_filter == category.id|stringformat:"s" %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-bold text-muted text-uppercase">Language Stream</label>
+                <select name="language" class="form-select">
+                    <option value="">All Languages</option>
+                    {% for language in languages %}
+                        <option value="{{ language.id }}" {% if language_filter == language.id|stringformat:"s" %}selected{% endif %}>
+                            {{ language.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-bold text-muted text-uppercase">Lifecycle Status</label>
+                <select name="status" class="form-select">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Visibility</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-dark w-100 py-2 rounded-3 fw-bold text-uppercase" style="font-size:0.85rem; letter-spacing:0.5px;">Go</button>
+            </div>
+            <div class="col-md-2">
+                <a href="{% url 'product_management' %}" class="btn btn-outline-secondary w-100 py-2 rounded-3 fw-bold text-uppercase" style="font-size:0.85rem; letter-spacing:0.5px;">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        
+        <div class="col-xl-8">
+            <div class="admin-card-glass h-100 p-0 overflow-hidden">
+                <div class="admin-table-wrapper border-0 rounded-0">
+                    <div class="table-responsive">
+                        <table class="table table-premium align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Title Architecture</th>
+                                    <th>Author</th>
+                                    <th>ISBN Signature</th>
+                                    <th>Taxonomy / Category</th>
+                                    <th>Language</th>
+                                    <th>Price Index</th>
+                                    <th>Stock Level</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions Matrix</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in page_obj %}
+                                <tr class="product-data-node" data-title="{{ product.title }}" data-stock="{{ product.stock }}">
+                                    <td>
+                                        {% if product.cover_image %}
+                                            <img src="{{ product.cover_image.url }}" width="55" height="75" class="product-thumbnail-frame">
+                                        {% else %}
+                                            <div class="bg-white text-muted d-flex align-items-center justify-content-center border rounded" style="width:55px; height:75px; font-size:0.65rem; font-weight:600;">No Image</div>
+                                        {% endif %}
+                                    </td>
+                                    <td><span class="fw-bold text-dark d-block" style="max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ product.title }}</span></td>
+                                    <td class="text-muted fw-medium">{{ product.author }}</td>
+                                    <td class="small font-monospace text-secondary">{{ product.isbn }}</td>
+                                    <td><span class="badge bg-light text-dark border px-2 py-1" style="font-size:0.75rem;">{{ product.category.name }}</span></td>
+                                    <td class="small text-muted">{{ product.language.name }}</td>
+                                    <td>
+                                        {% if product.sale_price %}
+                                            <div class="text-success fw-bold">₹{{ product.sale_price }}</div>
+                                            <del class="text-muted small">₹{{ product.regular_price }}</del>
+                                        {% else %}
+                                            <div class="fw-semibold text-dark">₹{{ product.regular_price }}</div>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if product.stock == 0 %}
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2">Out of Stock</span>
+                                        {% else %}
+                                            <span class="fw-bold">{{ product.stock }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if product.is_active %}
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary-subtle text-muted border border-secondary-subtle rounded-pill px-2">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex flex-column gap-1">
+                                            <a href="{% url 'edit_product' product.id %}" class="btn btn-warning btn-sm fw-bold px-3 rounded-pill" style="font-size:0.7rem;">Edit</a>
+                                            {% if product.is_active %}
+                                                <a href="{% url 'deactivate_product' product.id %}" class="btn btn-outline-danger btn-sm fw-bold px-3 rounded-pill" style="font-size:0.7rem;" onclick="return confirm('Deactivate this product?')">Deactivate</a>
+                                            {% else %}
+                                                <a href="{% url 'activate_product' product.id %}" class="btn btn-success btn-sm fw-bold px-3 rounded-pill" style="font-size:0.7rem;" onclick="return confirm('Activate this product?')">Activate</a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="10" class="text-center py-5 text-muted">
+                                        <i class="bi bi-folder-x display-6 d-block mb-2"></i> No analytical items found within registry.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="py-4 border-top bg-light-subtle d-flex justify-content-center align-items-center gap-1">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1" class="btn btn-sm btn-outline-dark px-3 rounded-pill">First</a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-sm btn-outline-dark px-3 rounded-pill"><i class="bi bi-chevron-left"></i></a>
+                    {% endif %}
+
+                    <span class="mx-3 small fw-bold text-muted">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-sm btn-outline-dark px-3 rounded-pill"><i class="bi bi-chevron-right"></i></a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-sm btn-outline-dark px-3 rounded-pill">Last</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="admin-card-glass h-100 d-flex flex-column gap-4">
+                <div>
+                    <h4 class="font-display fw-bold text-dark mb-1">Volumetric Analytics</h4>
+                    <p class="text-muted small m-0">Live Three.js dynamic inventory map reflecting stock metrics of listed items on this page view.</p>
+                </div>
+
+                <div class="metrics-viewport-3d shadow-sm">
+                    <div id="threejs-admin-canvas"></div>
+                </div>
+
+                <div class="d-flex flex-column gap-2 mt-auto pt-2 max-overflow" style="max-height: 180px; overflow-y:auto;">
+                    <h6 class="text-uppercase small tracking-widest fw-bold text-muted mb-1" style="font-size:0.7rem;">Active Inventory Key Index</h6>
+                    {% for product in page_obj|slice:":5" %}
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 small">
+                        <span class="text-muted text-truncate me-2" style="max-width:200px;">
+                            <i class="bi bi-bookmark-fill me-2" style="color: {% cycle '#113326' '#1b734e' '#dfba73' '#5c756b' '#22c55e' %};"></i>{{ product.title }}
+                        </span>
+                        <span class="fw-bold font-monospace text-dark">{{ product.stock }} items</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // --- 1. Extract Live Django Template Parameters via HTML Dataset Elements ---
+        const trackingNodes = document.querySelectorAll('.product-data-node');
+        const rawChartDataSet = [];
+
+        // Cycle palette matching line index selections
+        const structuralPalette = [0x113326, 0x1b734e, 0xdfba73, 0x5c756b, 0x198754, 0x22c55e];
+
+        trackingNodes.forEach((node, positionIndex) => {
+            const stockLevel = parseFloat(node.getAttribute('data-stock')) || 0;
+            const itemTitle = node.getAttribute('data-title') || "Product Node";
+            
+            rawChartDataSet.push({
+                title: itemTitle,
+                stock: stockLevel,
+                color: structuralPalette[positionIndex % structuralPalette.length]
+            });
+        });
+
+        // Fallback default mock coordinates parameters array if current view contains empty item sets
+        if (rawChartDataSet.length === 0) {
+            rawChartDataSet.push({ title: "Mock Node Delta", stock: 12, color: 0x113326 });
+            rawChartDataSet.push({ title: "Mock Node Omega", stock: 45, color: 0xdfba73 });
+        }
+
+        // --- 2. Three.js Engine Component Configuration Pipelines ---
+        const canvasContainer = document.getElementById('threejs-admin-canvas');
+        const scene = new THREE.Scene();
+        scene.background = null; // Maintain crystal transparency mapping parameters
+
+        const camera = new THREE.PerspectiveCamera(42, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 1000);
+        camera.position.set(2.8, 4.0, 5.2);
+        camera.lookAt(0, 0.6, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        canvasContainer.appendChild(renderer.domElement);
+
+        // Core Illuminations Framework mappings setup
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+
+        const coreKeylight = new THREE.DirectionalLight(0xffffff, 0.45);
+        coreKeylight.position.set(5, 9, 4);
+        coreKeylight.castShadow = true;
+        scene.add(coreKeylight);
+
+        // --- 3. Construct 3D Functional Data Geometries Chart Arrays ---
+        const chartClusterGroup = new THREE.Group();
+        scene.add(chartClusterGroup);
+
+        const spatialInterval = 0.5;
+        const geometryWidth = 0.28;
+        const structuralMeshesArray = [];
+        const targetedHeightsArray = [];
+
+        // Max item normalization bound thresholds definitions calculations
+        const maxStockBound = Math.max(...rawChartDataSet.map(d => d.stock), 1);
+
+        rawChartDataSet.forEach((dataNode, elementIndex) => {
+            // Normalize sizing factors into readable 3D vertical height parameters metrics (Max height cap at 2.4 units)
+            const normalizedHeightMetric = (dataNode.stock / maxStockBound) * 2.4 + 0.05;
+            targetedHeightsArray.push(normalizedHeightMetric);
+
+            const columnGeometry = new THREE.BoxGeometry(geometryWidth, 1, geometryWidth);
+            // Move internal pivot configuration mappings to upscale structural items lineally upwards along Y coordinate axes plane
+            columnGeometry.translate(0, 0.5, 0);
+
+            const columnMaterial = new THREE.MeshStandardMaterial({
+                color: dataNode.color,
+                roughness: 0.35,
+                metalness: 0.15
+            });
+
+            const columnMesh = new THREE.Mesh(columnGeometry, columnMaterial);
+            
+            // Layout alignment mapping centering distribution loops across chart space widths
+            const totalHorizontalSpan = (rawChartDataSet.length - 1) * spatialInterval;
+            const currentXCoordinate = (elementIndex * spatialInterval) - (totalHorizontalSpan / 2);
+            
+            columnMesh.position.set(currentXCoordinate, 0, 0);
+            columnMesh.scale.y = 0.01; // Spawn element flat to trigger standard load-sweep transitions smoothly
+
+            chartClusterGroup.add(columnMesh);
+            structuralMeshesArray.push(columnMesh);
+        });
+
+        // --- 4. Continuous Execution Frame Loop Pipeline Core ---
+        function frameExecutionEngine() {
+            requestAnimationFrame(frameExecutionEngine);
+
+            const temporalClock = Date.now() * 0.001;
+
+            // Rotate the analytics workspace model group smoothly over clock cycles
+            chartClusterGroup.rotation.y = temporalClock * 0.25;
+
+            // Apply dynamic interpolation upswings coupled with micro-vibrational weaving parameters frame by frame
+            structuralMeshesArray.forEach((meshItem, indexOffset) => {
+                const currentYScale = meshItem.scale.y;
+                const targetScaleYDestination = targetedHeightsArray[indexOffset];
+                
+                // Classic operational Lerp transformation calculations execution loop
+                meshItem.scale.y += (targetScaleYDestination - currentYScale) * 0.06;
+
+                // Minor rhythmic engine breathing oscillations additions
+                const breathingArc = Math.sin(temporalClock * 1.8 + indexOffset * 2.0) * 0.02;
+                meshItem.scale.y += breathingArc;
+            });
+
+            renderer.render(scene, camera);
+        }
+        frameExecutionEngine();
+
+        // --- 5. Layout Mutation Structural Resizing Observers Listeners ---
+        window.addEventListener('resize', () => {
+            camera.aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+        });
+    });
+</script>
+</body>
+</html> {% endcomment %} 

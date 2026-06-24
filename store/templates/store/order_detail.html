@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <h3>
+
+                Order Details
+
+            </h3>
+
+            <hr>
+
+            <p>
+
+                <strong>Order ID:</strong>
+
+                {{ order.order_id }}
+
+            </p>
+
+            <p>
+
+                <strong>Order Date:</strong>
+
+                {{ order.created_at }}
+
+            </p>
+
+            <p>
+
+                <strong>Payment Method:</strong>
+
+                {{ order.get_payment_method_display }}
+
+            </p>
+
+            <p>
+
+                <strong>Total:</strong>
+
+                ₹{{ order.total_amount }}
+
+            </p>
+
+            <a
+                href="{% url 'download_invoice' order.order_id %}"
+                class="btn btn-dark mt-3"
+            >
+
+                Download Invoice
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <h4>
+
+                Delivery Address
+
+            </h4>
+
+            <hr>
+
+            {{ order.full_name }}
+
+            <br>
+
+            {{ order.house_name }}
+
+            <br>
+
+            {{ order.area_street }}
+
+            <br>
+
+            {{ order.city }}
+
+            <br>
+
+            {{ order.state }}
+
+            -
+            {{ order.pincode }}
+
+        </div>
+
+    </div>
+
+    {% for item in order.items.all %}
+
+    <div class="card shadow-sm mb-3">
+
+        <div class="card-body">
+
+            <div class="row align-items-center">
+
+                <div class="col-md-2">
+
+                    {% if item.product_image %}
+
+                    <img
+                        src="{{ item.product_image.url }}"
+                        class="img-fluid rounded"
+                    >
+
+                    {% endif %}
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <h5>
+
+                        {{ item.product_title }}
+
+                    </h5>
+
+                </div>
+
+                <div class="col-md-2">
+
+                    Qty:
+                    {{ item.quantity }}
+
+                </div>
+
+                <div class="col-md-2">
+
+                    ₹{{ item.subtotal }}
+
+                </div>
+
+                <div class="col-md-1">
+
+                    <span
+                        class="badge bg-secondary"
+                    >
+
+                        {{ item.get_status_display }}
+
+                    </span>
+
+                </div>
+
+                <div class="col-md-2">
+
+                    {% if item.status == 'pending' or item.status == 'shipped' %}
+
+                    <form
+                        method="post"
+                        action="{% url 'cancel_order_item' item.id %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <input
+                            type="text"
+                            name="cancel_reason"
+                            class="form-control mb-2"
+                            placeholder="Reason (optional)"
+                        >
+
+                        <button
+                            type="submit"
+                            class="btn btn-danger btn-sm w-100"
+                        >
+
+                            Cancel
+
+                        </button>
+
+                    </form>
+
+                    {% endif %}
+
+                    {% if item.status == 'delivered' %}
+
+                    <form
+                        method="post"
+                        action="{% url 'return_order_item' item.id %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <input
+                            type="text"
+                            name="return_reason"
+                            class="form-control mb-2"
+                            placeholder="Return reason"
+                            required
+                        >
+
+                        <button
+                            type="submit"
+                            class="btn btn-warning btn-sm w-100"
+                        >
+
+                            Return
+
+                        </button>
+
+                    </form>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}
