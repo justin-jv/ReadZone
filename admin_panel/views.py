@@ -4,15 +4,29 @@ from django.contrib import messages
 
 from .forms import (AdminLoginForm, CategoryForm, LanguageForm, ProductForm, CouponForm, ProductOfferForm, CategoryOfferForm)
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Sum
+from django.db.models.functions import TruncMonth
 
 from accounts.models import CustomUser
 from store.models import (Category, Language, Product, ProductImage, Order, OrderItem, Wallet, WalletTransaction, Coupon, ProductOffer, CategoryOffer)
 
 from django.utils import timezone
+from datetime import timedelta
 
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount
+
+from reportlab.platypus import (SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer)
+
+from reportlab.lib import colors
+
+from reportlab.lib.styles import (getSampleStyleSheet)
+
+from openpyxl import Workbook
+
+from django.http import HttpResponse
+
+
 
 import os
 
@@ -77,11 +91,148 @@ def admin_dashboard(request):
         request.user.is_authenticated
         and request.user.is_superuser
     ):
-        return redirect('admin_login')
+        return redirect(
+            'admin_login'
+        )
+
+    total_users = (
+        CustomUser.objects.filter(
+            is_superuser=False
+        ).count()
+    )
+
+    total_products = (
+        Product.objects.count()
+    )
+
+    total_orders = (
+        Order.objects.count()
+    )
+
+    total_revenue = (
+        Order.objects.filter(
+            payment_status='paid'
+        ).aggregate(
+            total=Sum(
+                'total_amount'
+            )
+        )['total']
+        or 0
+    )
+
+    top_products = (
+        Product.objects.order_by(
+            '-sales_count'
+        )[:10]
+    )
+
+    monthly_sales = (
+
+        Order.objects.filter(
+            payment_status='paid'
+        )
+
+        .annotate(
+            month=TruncMonth(
+                'created_at'
+            )
+        )
+
+        .values(
+            'month'
+        )
+
+        .annotate(
+            revenue=Sum(
+                'total_amount'
+            )
+        )
+
+        .order_by(
+            'month'
+        )
+
+    )
+    
+    top_categories = (
+
+        Category.objects
+
+        .annotate(
+
+            total_sales=Sum(
+                'products__sales_count'
+            )
+
+        )
+
+        .order_by(
+            '-total_sales'
+        )[:10]
+
+    )
+
+    top_languages = (
+
+        Language.objects
+
+        .annotate(
+
+            total_sales=Sum(
+                'products__sales_count'
+            )
+
+        )
+
+        .order_by(
+            '-total_sales'
+        )[:10]
+
+    )
+
+
+    context = {
+
+        'total_users': total_users,
+
+        'total_products': total_products,
+
+        'total_orders': total_orders,
+
+        'total_revenue': total_revenue,
+
+        'top_products': top_products,
+
+        'top_categories': top_categories,
+
+        'top_languages': top_languages,
+
+        'sales_labels': [
+
+            sale['month'].strftime(
+                '%b %Y'
+            )
+
+            for sale in monthly_sales
+
+        ],
+
+        'sales_values': [
+
+            float(
+                sale['revenue']
+            )
+
+            for sale in monthly_sales
+
+        ],
+
+    }
 
     return render(
         request,
-        'admin_panel/admin_dashboard.html'
+        'admin_panel/admin_dashboard.html',
+        context
     )
 
 def user_management(request):
@@ -1835,3 +1986,389 @@ def toggle_category_offer(
     return redirect(
         'category_offer_management'
     )
+
+def sales_report(request):
+
+    if not (
+        request.user.is_authenticated
+        and request.user.is_superuser
+    ):
+        return redirect(
+            'admin_login'
+        )
+
+    report_type = request.GET.get(
+        'report_type',
+        'daily'
+    )
+
+    today = timezone.now()
+
+    orders = Order.objects.filter(
+        payment_status='paid'
+    )
+
+    if report_type == 'daily':
+
+        orders = orders.filter(
+            created_at__date=today.date()
+        )
+
+    elif report_type == 'weekly':
+
+        start_date = (
+            today
+            - timedelta(days=7)
+        )
+
+        orders = orders.filter(
+            created_at__gte=start_date
+        )
+
+    elif report_type == 'monthly':
+
+        orders = orders.filter(
+            created_at__year=today.year,
+            created_at__month=today.month
+        )
+
+    elif report_type == 'yearly':
+
+        orders = orders.filter(
+            created_at__year=today.year
+        )
+
+    elif report_type == 'custom':
+
+        start_date = request.GET.get(
+            'start_date'
+        )
+
+        end_date = request.GET.get(
+            'end_date'
+        )
+
+        if start_date and end_date:
+
+            orders = orders.filter(
+                created_at__date__range=[
+                    start_date,
+                    end_date
+                ]
+            )
+
+    total_orders = orders.count()
+
+    gross_sales = 0
+
+    offer_discount = 0
+
+    coupon_discount = 0
+
+    net_revenue = 0
+
+    for order in orders:
+
+        gross_sales += order.subtotal
+
+        coupon_discount += (
+            order.coupon_discount
+        )
+
+        net_revenue += (
+            order.total_amount
+        )
+
+        for item in order.items.all():
+
+            if item.product:
+
+                regular_total = (
+
+                    item.product.regular_price
+                    * item.quantity
+
+                )
+
+                effective_total = (
+
+                    item.price
+                    * item.quantity
+
+                )
+
+                offer_discount += (
+
+                    regular_total
+                    - effective_total
+
+                )
+
+    context = {
+
+        'orders': orders.order_by(
+            '-created_at'
+        ),
+
+        'report_type': report_type,
+
+        'total_orders': total_orders,
+
+        'gross_sales': gross_sales,
+
+        'coupon_discount': coupon_discount,
+
+        'net_revenue': net_revenue,
+
+        'offer_discount': offer_discount,
+
+    }
+
+    return render(
+
+        request,
+
+        'admin_panel/sales_report.html',
+
+        context
+
+    )
+
+def sales_report_pdf(request):
+
+    if not (
+        request.user.is_authenticated
+        and request.user.is_superuser
+    ):
+        return redirect(
+            'admin_login'
+        )
+
+    orders = Order.objects.filter(
+        payment_status='paid'
+    ).order_by(
+        '-created_at'
+    )
+
+    response = HttpResponse(
+        content_type='application/pdf'
+    )
+
+    response[
+        'Content-Disposition'
+    ] = (
+        'attachment; '
+        'filename="sales_report.pdf"'
+    )
+
+    doc = SimpleDocTemplate(
+        response
+    )
+
+    styles = getSampleStyleSheet()
+
+    elements = []
+
+    elements.append(
+        Paragraph(
+            'ReadZone Sales Report',
+            styles['Title']
+        )
+    )
+
+    elements.append(
+        Spacer(
+            1,
+            12
+        )
+    )
+
+    data = [
+
+        [
+
+            'Order ID',
+
+            'Customer',
+
+            'Amount',
+
+            'Coupon',
+
+            'Payment'
+
+        ]
+
+    ]
+
+    total_revenue = 0
+
+    for order in orders:
+
+        total_revenue += (
+            order.total_amount
+        )
+
+        data.append([
+
+            order.order_id,
+
+            order.full_name,
+
+            str(
+                order.total_amount
+            ),
+
+            str(
+                order.coupon_discount
+            ),
+
+            order.payment_method
+
+        ])
+
+    data.append([
+
+        '',
+
+        '',
+
+        '',
+
+        'Total Revenue',
+
+        f'Rs.{total_revenue}'
+
+    ])
+
+    table = Table(data)
+
+    table.setStyle(
+
+        TableStyle([
+
+            (
+
+                'BACKGROUND',
+
+                (0, 0),
+
+                (-1, 0),
+
+                colors.lightgrey
+
+            ),
+
+            (
+
+                'GRID',
+
+                (0, 0),
+
+                (-1, -1),
+
+                1,
+
+                colors.black
+
+            )
+
+        ])
+
+    )
+
+    elements.append(
+        table
+    )
+
+    doc.build(
+        elements
+    )
+
+    return response
+
+def sales_report_excel(request):
+
+    if not (
+        request.user.is_authenticated
+        and request.user.is_superuser
+    ):
+        return redirect(
+            'admin_login'
+        )
+
+    orders = Order.objects.filter(
+        payment_status='paid'
+    ).order_by(
+        '-created_at'
+    )
+
+    workbook = Workbook()
+
+    worksheet = workbook.active
+
+    worksheet.title = (
+        'Sales Report'
+    )
+
+    worksheet.append([
+
+        'Order ID',
+
+        'Customer',
+
+        'Date',
+
+        'Coupon Discount',
+
+        'Total Amount',
+
+        'Payment Method'
+
+    ])
+
+    for order in orders:
+
+        worksheet.append([
+
+            order.order_id,
+
+            order.full_name,
+
+            order.created_at.strftime(
+                '%Y-%m-%d'
+            ),
+
+            float(
+                order.coupon_discount
+            ),
+
+            float(
+                order.total_amount
+            ),
+
+            order.payment_method
+
+        ])
+
+    response = HttpResponse(
+
+        content_type=(
+            'application/vnd.openxmlformats-'
+            'officedocument.spreadsheetml.sheet'
+        )
+
+    )
+
+    response[
+        'Content-Disposition'
+    ] = (
+        'attachment; '
+        'filename=sales_report.xlsx'
+    )
+
+    workbook.save(
+        response
+    )
+
+    return response

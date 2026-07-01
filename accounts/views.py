@@ -16,11 +16,44 @@ from django.core.mail import send_mail
 
 def landing_page(request):
 
+    new_arrivals = Product.objects.filter(
+        is_active=True,
+        category__is_active=True,
+        language__is_active=True
+    ).order_by(
+        '-created_at'
+    )[:4]
+
+    best_sellers = Product.objects.filter(
+        is_active=True,
+        category__is_active=True,
+        language__is_active=True
+    ).order_by(
+        '-sales_count'
+    )[:4]
+
+    top_book = Product.objects.filter(
+        is_active=True
+    ).order_by(
+        '-sales_count',
+        '-created_at'
+    ).first()
+
+    context = {
+
+        'new_arrivals': new_arrivals,
+
+        'best_sellers': best_sellers,
+
+        'top_book': top_book,
+
+    }
+
     return render(
         request,
-        'accounts/landing_page.html'
+        'accounts/landing_page.html',
+        context
     )
-
 
 def signup(request):
 

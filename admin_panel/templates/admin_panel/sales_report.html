@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <h1 class="mb-4">
+        Sales Report
+    </h1>
+
+    <div class="mb-4">
+
+        <a
+            href="{% url 'sales_report_pdf' %}"
+            class="btn btn-danger"
+        >
+            Download PDF
+        </a>
+
+        <a
+            href="{% url 'sales_report_excel' %}"
+            class="btn btn-success"
+        >
+            Download Excel
+        </a>
+
+    </div>
+
+    <div class="card shadow mb-4">
+
+        <div class="card-body">
+
+            <form method="GET">
+
+                <div class="row">
+
+                    <div class="col-md-3">
+
+                        <select
+                            name="report_type"
+                            class="form-select"
+                        >
+
+                            <option value="daily"
+                            {% if report_type == 'daily' %}
+                            selected
+                            {% endif %}
+                            >
+                                Daily
+                            </option>
+
+                            <option value="weekly"
+                            {% if report_type == 'weekly' %}
+                            selected
+                            {% endif %}
+                            >
+                                Weekly
+                            </option>
+
+                            <option value="monthly"
+                            {% if report_type == 'monthly' %}
+                            selected
+                            {% endif %}
+                            >
+                                Monthly
+                            </option>
+
+                            <option value="yearly"
+                            {% if report_type == 'yearly' %}
+                            selected
+                            {% endif %}
+                            >
+                                Yearly
+                            </option>
+
+                            <option value="custom"
+                            {% if report_type == 'custom' %}
+                            selected
+                            {% endif %}
+                            >
+                                Custom
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <input
+                            type="date"
+                            name="start_date"
+                            class="form-control"
+                        >
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <input
+                            type="date"
+                            name="end_date"
+                            class="form-control"
+                        >
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary w-100"
+                        >
+                            Generate Report
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <div class="row mb-4">
+
+        <div class="col-md-3">
+
+            <div class="card shadow text-center">
+
+                <div class="card-body">
+
+                    <h6>
+                        Total Orders
+                    </h6>
+
+                    <h3>
+                        {{ total_orders }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card shadow text-center">
+
+                <div class="card-body">
+
+                    <h6>
+                        Gross Sales
+                    </h6>
+
+                    <h3>
+                        ₹{{ gross_sales }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card shadow text-center">
+
+                <div class="card-body">
+
+                    <h6>
+                        Offer Discount
+                    </h6>
+
+                    <h3 class="text-success">
+
+                        ₹{{ offer_discount }}
+
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card shadow text-center">
+
+                <div class="card-body">
+
+                    <h6>
+                        Coupon Discount
+                    </h6>
+
+                    <h3 class="text-success">
+
+                        ₹{{ coupon_discount }}
+
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card shadow mb-4">
+
+        <div class="card-body text-center">
+
+            <h4>
+                Net Revenue
+            </h4>
+
+            <h2 class="text-primary">
+
+                ₹{{ net_revenue }}
+
+            </h2>
+
+        </div>
+
+    </div>
+
+    <div class="card shadow">
+
+        <div class="card-body">
+
+            <h4 class="mb-3">
+
+                Orders
+
+            </h4>
+
+            <table class="table table-bordered">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Order ID
+                        </th>
+
+                        <th>
+                            Customer
+                        </th>
+
+                        <th>
+                            Date
+                        </th>
+
+                        <th>
+                            Coupon Discount
+                        </th>
+
+                        <th>
+                            Total Amount
+                        </th>
+
+                        <th>
+                            Payment Method
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for order in orders %}
+
+                    <tr>
+
+                        <td>
+                            {{ order.order_id }}
+                        </td>
+
+                        <td>
+                            {{ order.full_name }}
+                        </td>
+
+                        <td>
+                            {{ order.created_at }}
+                        </td>
+
+                        <td>
+                            ₹{{ order.coupon_discount }}
+                        </td>
+
+                        <td>
+                            ₹{{ order.total_amount }}
+                        </td>
+
+                        <td>
+                            {{ order.get_payment_method_display }}
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="6">
+
+                            No orders found.
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

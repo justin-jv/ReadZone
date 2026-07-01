@@ -49,6 +49,9 @@ urlpatterns = [
     path('category-offers/add/', views.add_category_offer, name='add_category_offer'),
     path('category-offers/edit/<int:offer_id>/', views.edit_category_offer, name='edit_category_offer'),
     path('category-offers/toggle/<int:offer_id>/', views.toggle_category_offer, name='toggle_category_offer'),
-            
+
+    path('sales-report/', views.sales_report, name='sales_report'),
+    path('sales-report/pdf/', views.sales_report_pdf, name='sales_report_pdf'),
+    path('sales-report/excel/', views.sales_report_excel, name='sales_report_excel'),
     
 ]

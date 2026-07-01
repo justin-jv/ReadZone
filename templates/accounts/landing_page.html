@@ -13,19 +13,53 @@
             <div class="col-md-6">
 
                 <h1>
-                    A reader lives a thousand lives before he dies.
+
+                    {% if top_book %}
+
+                        {{ top_book.title }}
+
+                    {% else %}
+
+                        Discover Your Next Favorite Book
+
+                    {% endif %}
+
                 </h1>
 
                 <p class="lead">
-                    Discover your next favorite book.
+
+                    {% if top_book %}
+
+                        One of the most loved books among ReadZone readers.
+
+                    {% else %}
+
+                        Discover your next favorite book.
+
+                    {% endif %}
+
                 </p>
 
             </div>
 
             <div class="col-md-6 text-center">
 
-                <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794"
-                     class="img-fluid rounded">
+                {% if top_book and top_book.cover_image %}
+
+                <img
+                    src="{{ top_book.cover_image.url }}"
+                    class="img-fluid rounded"
+                    style="
+                        {% comment %} height: 400px;
+                        width: 100%;
+                        object-fit: cover; {% endcomment %}
+                        max-height: 350px;
+                        width: auto;
+                        object-fit: contain;
+                    "
+                >
+
+                {% endif %}
 
             </div>
 
@@ -41,29 +75,48 @@
 
     <div class="row">
 
-        {% for i in "1234" %}
+        {% for book in new_arrivals %}
 
         <div class="col-md-3 mb-4">
 
-            <div class="card book-card">
+            <div class="card book-card h-100">
 
-                <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f"
-                     class="card-img-top">
+                {% if book.cover_image %}
+
+                <img
+                    src="{{ book.cover_image.url }}"
+                    class="card-img-top"
+                    style="height:300px;object-fit:cover;"
+                >
+
+                {% endif %}
 
                 <div class="card-body">
 
-                    <h5>Book Name</h5>
+                    <h5>
+                        {{ book.title }}
+                    </h5>
 
-                    <p>Author Name</p>
+                    <p>
+                        {{ book.author }}
+                    </p>
 
-                    <h6>₹499</h6>
+                    <h6>
+                        ₹{{ book.effective_price }}
+                    </h6>
+
+                    <a
+                        href="{% url 'product_detail' book.slug %}"
+                        class="btn btn-dark btn-sm"
+                    >
+                        View Book
+                    </a>
 
                 </div>
 
             </div>
 
         </div>
-
         {% endfor %}
 
     </div>
@@ -86,22 +139,42 @@
 
     <div class="row">
 
-        {% for i in "1234" %}
+        {% for book in best_sellers %}
 
         <div class="col-md-3 mb-4">
 
-            <div class="card book-card">
+            <div class="card book-card h-100">
 
-                <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f"
-                     class="card-img-top">
+                {% if book.cover_image %}
+
+                <img
+                    src="{{ book.cover_image.url }}"
+                    class="card-img-top"
+                    style="height:300px;object-fit:cover;"
+                >
+
+                {% endif %}
 
                 <div class="card-body">
 
-                    <h5>Book Name</h5>
+                    <h5>
+                        {{ book.title }}
+                    </h5>
 
-                    <p>Author Name</p>
+                    <p>
+                        {{ book.author }}
+                    </p>
 
-                    <h6>₹599</h6>
+                    <h6>
+                        ₹{{ book.effective_price }}
+                    </h6>
+
+                    <a
+                        href="{% url 'product_detail' book.slug %}"
+                        class="btn btn-dark btn-sm"
+                    >
+                        View Book
+                    </a>
 
                 </div>
 

@@ -813,6 +813,64 @@ class WalletTransaction(models.Model):
             f" - {self.transaction_type}"
         )
     
+class ReferralCode(models.Model):
+
+    user = models.OneToOneField(
+        CustomUser,
+        on_delete=models.CASCADE
+    )
+
+    code = models.CharField(
+        max_length=20,
+        unique=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+
+        return self.code
+
+
+class ReferralUsage(models.Model):
+
+    referrer = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='referrals_given'
+    )
+
+    referred_user = models.OneToOneField(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='referral_used'
+    )
+
+    referral_code = models.ForeignKey(
+        ReferralCode,
+        on_delete=models.CASCADE
+    )
+
+    reward_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=100
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+
+        return (
+            f"{self.referrer.email}"
+            f" -> "
+            f"{self.referred_user.email}"
+        )
+    
 class Coupon(models.Model):
 
     code = models.CharField(
