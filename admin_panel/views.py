@@ -5,7 +5,7 @@ from django.contrib import messages
 from .forms import (AdminLoginForm, CategoryForm, LanguageForm, ProductForm, CouponForm, ProductOfferForm, CategoryOfferForm)
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
-from django.db.models.functions import TruncMonth
+from django.db.models.functions import TruncMonth, Coalesce
 
 from accounts.models import CustomUser
 from store.models import (Category, Language, Product, ProductImage, Order, OrderItem, Wallet, WalletTransaction, Coupon, ProductOffer, CategoryOffer, CouponUsage)
@@ -160,10 +160,20 @@ def admin_dashboard(request):
 
         .annotate(
 
-            total_sales=Sum(
-                'products__sales_count'
+            total_sales=Coalesce(
+
+                Sum(
+                    'products__sales_count'
+                ),
+
+                0
+
             )
 
+        )
+
+        .filter(
+            total_sales__gt=0
         )
 
         .order_by(
@@ -178,10 +188,20 @@ def admin_dashboard(request):
 
         .annotate(
 
-            total_sales=Sum(
-                'products__sales_count'
+            total_sales=Coalesce(
+
+                Sum(
+                    'products__sales_count'
+                ),
+
+                0
+
             )
 
+        )
+
+        .filter(
+            total_sales__gt=0
         )
 
         .order_by(
