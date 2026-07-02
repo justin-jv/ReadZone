@@ -1831,13 +1831,27 @@ def download_invoice(
 
         Paragraph(
             (
-                f"<b>Subtotal:</b> "
+                f"<b>Subtotal (After Offers):</b> "
                 f"Rs. {order.subtotal}"
             ),
             styles['Normal']
         )
 
     )
+
+    if order.coupon:
+
+        elements.append(
+
+            Paragraph(
+                (
+                    f"<b>Coupon ({order.coupon.code}):</b> "
+                    f"- Rs. {order.coupon_discount}"
+                ),
+                styles['Normal']
+            )
+
+        )
 
     elements.append(
 
