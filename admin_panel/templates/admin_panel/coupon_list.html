@@ -93,11 +93,11 @@
 
                             <td>
 
-                                {{ coupon.used_count }}
+                                {{ coupon.total_used }}
 
                                 /
 
-                                {{ coupon.max_usage }}
+                                {{ coupon.max_possible_usage }}
 
                             </td>
 
@@ -116,11 +116,7 @@
                                     Inactive
                                 </span>
 
-                                {% elif coupon.used_count >= coupon.max_usage %}
-
-                                <span class="badge bg-warning text-dark">
-                                    Limit Reached
-                                </span>
+                                
 
                                 {% elif coupon.valid_to|date:"Y-m-d H:i:s" < current_time %}
 

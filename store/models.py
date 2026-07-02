@@ -892,12 +892,8 @@ class Coupon(models.Model):
 
     valid_to = models.DateTimeField()
 
-    max_usage = models.PositiveIntegerField(
+    max_usage_per_user = models.PositiveIntegerField(
         default=1
-    )
-
-    used_count = models.PositiveIntegerField(
-        default=0
     )
 
     is_active = models.BooleanField(
@@ -923,8 +919,12 @@ class CouponUsage(models.Model):
         on_delete=models.CASCADE
     )
 
-    used_at = models.DateTimeField(
-        auto_now_add=True
+    usage_count = models.PositiveIntegerField(
+        default=0
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
     )
 
     class Meta:
@@ -933,6 +933,15 @@ class CouponUsage(models.Model):
             'coupon',
             'user'
         )
+
+    def __str__(self):
+
+        return (
+            f'{self.user.email} - '
+            f'{self.coupon.code} '
+            f'({self.usage_count})'
+        )
+
 
 class ProductOffer(models.Model):
 

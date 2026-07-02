@@ -493,7 +493,7 @@ class CouponForm(forms.ModelForm):
 
             'valid_to',
 
-            'max_usage',
+            'max_usage_per_user',
 
             'is_active',
 
@@ -537,6 +537,12 @@ class CouponForm(forms.ModelForm):
         ].widget.attrs.update({
             'class': 'form-check-input'
         })
+
+        self.fields[
+            'max_usage_per_user'
+        ].label = (
+            'Max Usage Per User'
+        )
 
     def clean_code(self):
 
@@ -592,19 +598,19 @@ class CouponForm(forms.ModelForm):
 
         return minimum_purchase
 
-    def clean_max_usage(self):
+    def clean_max_usage_per_user(self):
 
-        max_usage = self.cleaned_data[
-            'max_usage'
+        max_usage_per_user = self.cleaned_data[
+            'max_usage_per_user'
         ]
 
-        if max_usage <= 0:
+        if max_usage_per_user <= 0:
 
             raise forms.ValidationError(
-                'Maximum usage must be greater than zero.'
+                'Maximum usage per user must be greater than zero.'
             )
 
-        return max_usage
+        return max_usage_per_user
 
     def clean(self):
 

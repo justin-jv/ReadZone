@@ -29,8 +29,8 @@ urlpatterns = [
 
     path('wallet/', views.wallet, name='wallet'),
 
-    path('apply-coupon/', views.apply_coupon, name='apply_coupon'),
-    path('remove-coupon/', views.remove_coupon, name='remove_coupon'),
+    # path('apply-coupon/', views.apply_coupon, name='apply_coupon'),
+    # path('remove-coupon/', views.remove_coupon, name='remove_coupon'),
 
     path('apply-coupon/<int:coupon_id>/', views.apply_coupon, name='apply_coupon'),
     path('remove-coupon/', views.remove_coupon, name='remove_coupon'),

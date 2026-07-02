@@ -8,7 +8,7 @@ from django.db.models import Q, Sum
 from django.db.models.functions import TruncMonth
 
 from accounts.models import CustomUser
-from store.models import (Category, Language, Product, ProductImage, Order, OrderItem, Wallet, WalletTransaction, Coupon, ProductOffer, CategoryOffer)
+from store.models import (Category, Language, Product, ProductImage, Order, OrderItem, Wallet, WalletTransaction, Coupon, ProductOffer, CategoryOffer, CouponUsage)
 
 from django.utils import timezone
 from datetime import timedelta
@@ -1522,11 +1522,35 @@ def coupon_management(request):
         '-created_at'
     )
 
+    total_users = CustomUser.objects.filter(
+        is_superuser=False
+    ).count()
+
+    for coupon in coupons:
+
+        coupon.total_used = sum(
+
+            usage.usage_count
+
+            for usage in CouponUsage.objects.filter(
+                coupon=coupon
+            )
+
+        )
+
+        coupon.max_possible_usage = (
+
+            total_users
+            * coupon.max_usage_per_user
+
+        )
+
     return render(
         request,
         'admin_panel/coupon_list.html',
         {
-            'coupons': coupons
+            'coupons': coupons,
+            'total_users': total_users,
         }
     )
 

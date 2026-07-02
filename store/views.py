@@ -625,6 +625,11 @@ def decrease_quantity(
 @login_required
 def checkout(request):
 
+    print(
+        'SESSION COUPON:',
+        request.session.get('coupon_id')
+    )
+
     cart, created = Cart.objects.get_or_create(
         user=request.user
     )
@@ -721,6 +726,11 @@ def checkout(request):
 
             now = timezone.now()
 
+            coupon_usage = CouponUsage.objects.filter(
+                coupon=coupon,
+                user=request.user
+            ).first()
+
             if (
 
                 coupon.is_active
@@ -729,7 +739,11 @@ def checkout(request):
 
                 and coupon.valid_to >= now
 
-                and coupon.used_count < coupon.max_usage
+                and (
+                    not coupon_usage
+                    or coupon_usage.usage_count
+                    < coupon.max_usage_per_user
+                )
 
                 and subtotal >= coupon.minimum_purchase_amount
 
@@ -807,7 +821,9 @@ def checkout(request):
 
             default_address = addresses.first()
 
-    available_coupons = Coupon.objects.filter(
+    available_coupons = []
+
+    for available_coupon in Coupon.objects.filter(
 
         is_active=True,
 
@@ -817,7 +833,26 @@ def checkout(request):
 
     ).order_by(
         '-discount_amount'
-    )
+    ):
+
+        coupon_usage = CouponUsage.objects.filter(
+            coupon=available_coupon,
+            user=request.user
+        ).first()
+
+        if (
+
+            coupon_usage
+            and coupon_usage.usage_count
+            >= available_coupon.max_usage_per_user
+
+        ):
+
+            continue
+
+        available_coupons.append(
+            available_coupon
+        )
 
     context = {
 
@@ -1033,6 +1068,12 @@ def place_order(request):
 
             now = timezone.now()
 
+            coupon_usage = CouponUsage.objects.filter(
+                coupon=coupon,
+                user=request.user
+            ).first()
+
+            
             if not (
 
                 coupon.is_active
@@ -1041,7 +1082,11 @@ def place_order(request):
 
                 and coupon.valid_to >= now
 
-                and coupon.used_count < coupon.max_usage
+                and (
+                    not coupon_usage
+                    or coupon_usage.usage_count
+                    < coupon.max_usage_per_user
+                )
 
                 and subtotal >= coupon.minimum_purchase_amount
 
@@ -1061,10 +1106,11 @@ def place_order(request):
                     'checkout'
                 )
 
-            if CouponUsage.objects.filter(
-                coupon=coupon,
-                user=request.user
-            ).exists():
+            if (
+                coupon_usage
+                and coupon_usage.usage_count
+                >= coupon.max_usage_per_user
+            ):
 
                 request.session.pop(
                     'coupon_id',
@@ -1073,7 +1119,7 @@ def place_order(request):
 
                 messages.error(
                     request,
-                    'You already used this coupon.'
+                    'You have reached the maximum usage limit for this coupon.'
                 )
 
                 return redirect(
@@ -1214,20 +1260,19 @@ def place_order(request):
             )
 
         if coupon:
-
-            CouponUsage.objects.create(
-
-                coupon=coupon,
-
-                user=request.user
-
+            
+            coupon_usage, created = (
+                CouponUsage.objects.get_or_create(
+                    coupon=coupon,
+                    user=request.user
+                )
             )
 
-            coupon.used_count += 1
+            coupon_usage.usage_count += 1
 
-            coupon.save(
+            coupon_usage.save(
                 update_fields=[
-                    'used_count'
+                    'usage_count'
                 ]
             )
 
@@ -1883,140 +1928,140 @@ def wallet(request):
         context
     )
 
-@login_required
-def apply_coupon(request):
+# @login_required
+# def apply_coupon(request):
 
-    if request.method != 'POST':
+#     if request.method != 'POST':
 
-        return redirect(
-            'checkout'
-        )
+#         return redirect(
+#             'checkout'
+#         )
 
-    if request.session.get(
-        'coupon_id'
-    ):
+#     if request.session.get(
+#         'coupon_id'
+#     ):
 
-        messages.error(
-            request,
-            'Remove current coupon first.'
-        )
+#         messages.error(
+#             request,
+#             'Remove current coupon first.'
+#         )
 
-        return redirect(
-            'checkout'
-        )
+#         return redirect(
+#             'checkout'
+#         )
 
-    code = request.POST.get(
-        'coupon_code',
-        ''
-    ).strip().upper()
+#     code = request.POST.get(
+#         'coupon_code',
+#         ''
+#     ).strip().upper()
 
-    try:
+#     try:
 
-        coupon = Coupon.objects.get(
-            code=code
-        )
+#         coupon = Coupon.objects.get(
+#             code=code
+#         )
 
-    except Coupon.DoesNotExist:
+#     except Coupon.DoesNotExist:
 
-        messages.error(
-            request,
-            'Invalid coupon.'
-        )
+#         messages.error(
+#             request,
+#             'Invalid coupon.'
+#         )
 
-        return redirect(
-            'checkout'
-        )
+#         return redirect(
+#             'checkout'
+#         )
 
-    cart = Cart.objects.get(
-        user=request.user
-    )
+#     cart = Cart.objects.get(
+#         user=request.user
+#     )
 
-    subtotal = sum(
-        item.subtotal
-        for item in cart.items.all()
-    )
+#     subtotal = sum(
+#         item.subtotal
+#         for item in cart.items.all()
+#     )
 
-    now = timezone.now()
+#     now = timezone.now()
 
-    if not coupon.is_active:
+#     if not coupon.is_active:
 
-        messages.error(
-            request,
-            'Coupon is inactive.'
-        )
+#         messages.error(
+#             request,
+#             'Coupon is inactive.'
+#         )
 
-    elif coupon.valid_from > now:
+#     elif coupon.valid_from > now:
 
-        messages.error(
-            request,
-            'Coupon is not active yet.'
-        )
+#         messages.error(
+#             request,
+#             'Coupon is not active yet.'
+#         )
 
-    elif coupon.valid_to < now:
+#     elif coupon.valid_to < now:
 
-        messages.error(
-            request,
-            'Coupon expired.'
-        )
+#         messages.error(
+#             request,
+#             'Coupon expired.'
+#         )
 
-    elif coupon.used_count >= coupon.max_usage:
+#     elif coupon.used_count >= coupon.max_usage:
 
-        messages.error(
-            request,
-            'Coupon usage limit reached.'
-        )
+#         messages.error(
+#             request,
+#             'Coupon usage limit reached.'
+#         )
 
-    elif subtotal < coupon.minimum_purchase_amount:
+#     elif subtotal < coupon.minimum_purchase_amount:
 
-        messages.error(
-            request,
-            (
-                f'Minimum purchase amount '
-                f'₹{coupon.minimum_purchase_amount}'
-            )
-        )
+#         messages.error(
+#             request,
+#             (
+#                 f'Minimum purchase amount '
+#                 f'₹{coupon.minimum_purchase_amount}'
+#             )
+#         )
 
-    elif CouponUsage.objects.filter(
-        coupon=coupon,
-        user=request.user
-    ).exists():
+#     elif CouponUsage.objects.filter(
+#         coupon=coupon,
+#         user=request.user
+#     ).exists():
 
-        messages.error(
-            request,
-            'You already used this coupon.'
-        )
+#         messages.error(
+#             request,
+#             'You already used this coupon.'
+#         )
 
-    else:
+#     else:
 
-        request.session[
-            'coupon_id'
-        ] = coupon.id
+#         request.session[
+#             'coupon_id'
+#         ] = coupon.id
 
-        messages.success(
-            request,
-            'Coupon applied successfully.'
-        )
+#         messages.success(
+#             request,
+#             'Coupon applied successfully.'
+#         )
 
-    return redirect(
-        'checkout'
-    )
+#     return redirect(
+#         'checkout'
+#     )
 
-@login_required
-def remove_coupon(request):
+# @login_required
+# def remove_coupon(request):
 
-    request.session.pop(
-        'coupon_id',
-        None
-    )
+#     request.session.pop(
+#         'coupon_id',
+#         None
+#     )
 
-    messages.success(
-        request,
-        'Coupon removed.'
-    )
+#     messages.success(
+#         request,
+#         'Coupon removed.'
+#     )
 
-    return redirect(
-        'checkout'
-    )
+#     return redirect(
+#         'checkout'
+#     )
 
 @login_required
 def apply_coupon(
@@ -2088,31 +2133,30 @@ def apply_coupon(
         return redirect(
             'checkout'
         )
-
-    if coupon.used_count >= coupon.max_usage:
-
-        messages.error(
-            request,
-            'Coupon usage limit reached.'
-        )
-
-        return redirect(
-            'checkout'
-        )
-
-    if CouponUsage.objects.filter(
+    
+    coupon_usage = CouponUsage.objects.filter(
         coupon=coupon,
         user=request.user
-    ).exists():
+    ).first()
+
+    if (
+        coupon_usage
+        and coupon_usage.usage_count
+        >= coupon.max_usage_per_user
+    ):
 
         messages.error(
             request,
-            'You already used this coupon.'
+            'You have reached the maximum usage limit for this coupon.'
         )
 
         return redirect(
             'checkout'
-        )
+        )    
+    
+    print('APPLYING COUPON:', coupon.code)
+    print('SUBTOTAL:', subtotal)
+    print('MIN PURCHASE:', coupon.minimum_purchase_amount)
 
     request.session[
         'coupon_id'
@@ -2443,19 +2487,18 @@ def verify_razorpay_payment(request):
 
         if coupon:
 
-            CouponUsage.objects.create(
-
-                coupon=coupon,
-
-                user=request.user
-
+            coupon_usage, created = (
+                CouponUsage.objects.get_or_create(
+                    coupon=coupon,
+                    user=request.user
+                )
             )
 
-            coupon.used_count += 1
+            coupon_usage.usage_count += 1
 
-            coupon.save(
+            coupon_usage.save(
                 update_fields=[
-                    'used_count'
+                    'usage_count'
                 ]
             )
 

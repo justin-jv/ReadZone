@@ -98,13 +98,15 @@
 
                             <label class="form-label">
 
-                                Maximum Usage
+                                Maximum Usage Per User
 
                             </label>
 
-                            {{ form.max_usage }}
+                            {{ form.max_usage_per_user }}
 
-                            {{ form.max_usage.errors }}
+                            {{ form.max_usage_per_user.errors }}
+
+                            <small class="text-muted">Number of times each user can use this coupon.</small>
 
                         </div>
 
