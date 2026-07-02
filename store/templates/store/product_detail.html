@@ -333,38 +333,41 @@ z-index:10;
                     <!-- PRICE -->
 
                     <div class="price-section">
-
-                        {% if product.sale_price %}
-
                         <span class="old-price">
-
                             ₹{{ product.regular_price }}
-
                         </span>
 
                         <span class="new-price">
-
-                            ₹{{ product.sale_price }}
-
+                            ₹{{ product.effective_price }}
                         </span>
+
+                        {% if product.final_discount_percentage > 0 %}
 
                         <span class="discount-badge">
-
-                            {{ product.discount_percentage }}% OFF
-
-                        </span>
-
-                        {% else %}
-
-                        <span class="new-price">
-
-                            ₹{{ product.regular_price }}
-
+                            {{ product.final_discount_percentage }}% OFF
                         </span>
 
                         {% endif %}
-
                     </div>
+
+
+                    {% if product.active_offer_type == 'product' %}
+
+                    <p class="text-success small mt-2">
+                        Special Product Offer Applied
+                        ({{ product.active_offer_percentage }}% OFF)
+                    </p>
+
+                    {% elif product.active_offer_type == 'category' %}
+
+                    <p class="text-success small mt-2">
+                        Category Offer Applied
+                        ({{ product.active_offer_percentage }}% OFF)
+                    </p>
+
+                    {% endif %}
+
+                    
 
                     <!-- STOCK -->
 

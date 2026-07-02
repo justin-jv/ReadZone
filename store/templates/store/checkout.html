@@ -171,7 +171,46 @@ value="{{ default_address.id }}">
 <div class="col-md-6">
 <h5>{{ item.product.title }}</h5>
 <p class="text-muted mb-1">{{ item.product.author }}</p>
-<strong>₹{{ item.product.effective_price }}</strong>
+
+<div>
+
+    <span class="text-decoration-line-through text-muted">
+
+        ₹{{ item.product.regular_price }}
+
+    </span>
+
+    <br>
+
+    <strong>
+
+        ₹{{ item.product.effective_price }}
+
+    </strong>
+
+    {% if item.product.active_offer_type == 'product' %}
+
+    <div class="text-success small">
+
+        Product Offer Applied
+        ({{ item.product.active_offer_percentage }}% OFF)
+
+    </div>
+
+    {% elif item.product.active_offer_type == 'category' %}
+
+    <div class="text-success small">
+
+        Category Offer Applied
+        ({{ item.product.active_offer_percentage }}% OFF)
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+
 <div class="small mt-2">Quantity: {{ item.quantity }}</div>
 </div>
 
@@ -298,11 +337,95 @@ value="{{ default_address.id }}">
 <hr>
 
 <div class="d-flex justify-content-between mb-2">
-<span>Subtotal</span>
-<span>₹{{ subtotal }}</span>
+
+    <span>
+        MRP Total
+    </span>
+
+    <span>
+
+        ₹{{ regular_total }}
+
+    </span>
+
 </div>
 
+
 <div class="d-flex justify-content-between mb-2">
+
+    <span>
+        Sale Discount
+    </span>
+
+    <span class="text-success">
+
+        - ₹{{ sale_discount_total }}
+
+    </span>
+
+</div>
+
+
+<div class="d-flex justify-content-between mb-2">
+
+    <span>
+        Product/Category Offers
+    </span>
+
+    <span class="text-success">
+
+        - ₹{{ offer_discount }}
+
+    </span>
+
+</div>
+
+
+<div class="d-flex justify-content-between mb-2">
+
+    <span>
+        Coupon Discount
+    </span>
+
+    <span class="text-success">
+
+        - ₹{{ coupon_discount }}
+
+    </span>
+
+</div>
+
+
+<div class="d-flex justify-content-between mb-2">
+
+    <span>
+        Shipping Charge
+    </span>
+
+    <span>
+
+        ₹{{ shipping_charge }}
+
+    </span>
+
+</div>
+
+
+<div class="d-flex justify-content-between mb-2">
+
+    <span>
+        Tax
+    </span>
+
+    <span>
+
+        ₹{{ tax_amount }}
+
+    </span>
+
+</div>
+
+{% comment %} <div class="d-flex justify-content-between mb-2">
 <span>Shipping</span>
 <span>₹{{ shipping_charge }}</span>
 </div>
@@ -310,7 +433,7 @@ value="{{ default_address.id }}">
 <div class="d-flex justify-content-between mb-2">
 <span>Tax</span>
 <span>₹{{ tax_amount }}</span>
-</div>
+</div> {% endcomment %}
 
 <hr>
 

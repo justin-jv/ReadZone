@@ -669,25 +669,43 @@ def checkout(request):
                 'cart'
             )
         
+    regular_total = 0
+
+    sale_discount_total = 0 
+
     offer_discount = 0
 
     for item in items:
 
-        regular_total = (
+        item_regular_total = (
             item.product.regular_price
             * item.quantity
         )
 
-        effective_total = (
+        item_sale_total = (
+            (
+                item.product.sale_price
+                or item.product.regular_price
+            )
+            * item.quantity
+        )
+
+        item_effective_total = (
             item.product.effective_price
             * item.quantity
         )
 
-        offer_discount += (
-            regular_total
-            - effective_total
+        regular_total += item_regular_total
+
+        sale_discount_total += (
+            item_regular_total
+            - item_sale_total
         )
 
+        offer_discount += (
+            item_sale_total
+            - item_effective_total
+        )
 
     subtotal = sum(
         item.subtotal
@@ -879,6 +897,10 @@ def checkout(request):
         'available_coupons': available_coupons,
 
         'offer_discount': offer_discount,
+
+        'regular_total': regular_total,
+
+        'sale_discount_total': sale_discount_total,
 
         'razorpay_key_id': settings.RAZORPAY_KEY_ID,
 

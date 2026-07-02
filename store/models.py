@@ -326,6 +326,144 @@ class Product(models.Model):
 
         return base_price
     
+
+    @property
+    def active_offer_percentage(self):
+
+        now = timezone.now()
+
+        product_offer = self.offers.filter(
+            is_active=True,
+            valid_from__lte=now,
+            valid_to__gte=now
+        ).first()
+
+        category_offer = self.category.offers.filter(
+            is_active=True,
+            valid_from__lte=now,
+            valid_to__gte=now
+        ).first()
+
+        product_percentage = (
+            product_offer.offer_percentage
+            if product_offer
+            else 0
+        )
+
+        category_percentage = (
+            category_offer.offer_percentage
+            if category_offer
+            else 0
+        )
+
+        return max(
+            product_percentage,
+            category_percentage
+        )
+
+
+    @property
+    def active_offer_type(self):
+
+        now = timezone.now()
+
+        product_offer = self.offers.filter(
+            is_active=True,
+            valid_from__lte=now,
+            valid_to__gte=now
+        ).first()
+
+        category_offer = self.category.offers.filter(
+            is_active=True,
+            valid_from__lte=now,
+            valid_to__gte=now
+        ).first()
+
+        product_percentage = (
+            product_offer.offer_percentage
+            if product_offer
+            else 0
+        )
+
+        category_percentage = (
+            category_offer.offer_percentage
+            if category_offer
+            else 0
+        )
+
+        if product_percentage >= category_percentage:
+
+            return 'product' if product_percentage else None
+
+        return 'category'
+
+
+    @property
+    def sale_discount_percentage(self):
+
+        if self.sale_price:
+
+            return round(
+
+                (
+                    self.regular_price
+                    - self.sale_price
+                )
+
+                * 100
+
+                / self.regular_price
+
+            )
+
+        return 0
+
+
+    @property
+    def sale_discount_amount(self):
+
+        if self.sale_price:
+
+            return (
+                self.regular_price
+                - self.sale_price
+            )
+
+        return 0
+
+
+    @property
+    def offer_discount_amount(self):
+
+        base_price = (
+            self.sale_price
+            if self.sale_price
+            else self.regular_price
+        )
+
+        return (
+            base_price
+            - self.effective_price
+        )
+
+
+    @property
+    def final_discount_percentage(self):
+
+        return round(
+
+            (
+                self.regular_price
+                - self.effective_price
+            )
+
+            * 100
+
+            / self.regular_price
+
+        )
+
+
     @property
     def best_offer_percentage(self):
 
