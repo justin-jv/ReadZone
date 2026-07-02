@@ -336,7 +336,13 @@ def login_view(request):
 
 def logout_view(request):
 
+    is_admin = request.user.is_superuser
+
     logout(request)
+
+    if is_admin:
+
+        return redirect('admin_login')
 
     return redirect('landing_page')
 

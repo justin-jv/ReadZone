@@ -1,10 +1,210 @@
-{% extends 'base.html' %}
+{% extends 'admin_base.html' %}
+
+{% block extra_css %}
+<style>
+.dashboard-header h1{
+    font-size:2rem;
+    font-weight:700;
+    margin-bottom:.25rem;
+}
+.dashboard-header p{
+    color:#6b7a74;
+    margin-bottom:2rem;
+}
+.stat-card,.glass-card{
+    background:rgba(255,255,255,.72);
+    backdrop-filter:blur(18px);
+    border:1px solid rgba(0,0,0,.06);
+    border-radius:24px;
+    transition:.25s;
+}
+.stat-card:hover{
+    transform:translateY(-6px);
+}
+.stat-icon{
+    width:52px;height:52px;border-radius:16px;
+    display:flex;align-items:center;justify-content:center;
+    background:#23473b;color:#fff;
+}
+.stat-value{font-size:1.8rem;font-weight:700;}
+.pill-group a{
+    text-decoration:none;
+    padding:.5rem 1rem;
+    border-radius:999px;
+    color:#23473b;
+    background:#eef2ef;
+    margin-right:.5rem;
+}
+.pill-group a.active{
+    background:#23473b;
+    color:#fff;
+}
+.table tbody tr:hover{background:rgba(35,71,59,.05);}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-header">
+    <h1>Admin Dashboard</h1>
+    <p>Welcome back. Here's what's happening in your store today.</p>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-6 col-xl-3">
+        <div class="stat-card p-4 h-100">
+            <div class="stat-icon mb-3"><i class="fas fa-users"></i></div>
+            <div class="stat-value">{{ total_users }}</div>
+            <div>Total Users</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-xl-3">
+        <div class="stat-card p-4 h-100">
+            <div class="stat-icon mb-3"><i class="fas fa-book"></i></div>
+            <div class="stat-value">{{ total_products }}</div>
+            <div>Total Products</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-xl-3">
+        <div class="stat-card p-4 h-100">
+            <div class="stat-icon mb-3"><i class="fas fa-cart-shopping"></i></div>
+            <div class="stat-value">{{ total_orders }}</div>
+            <div>Total Orders</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-xl-3">
+        <div class="stat-card p-4 h-100">
+            <div class="stat-icon mb-3"><i class="fas fa-indian-rupee-sign"></i></div>
+            <div class="stat-value">₹{{ total_revenue }}</div>
+            <div>Total Revenue</div>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card p-4 mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <h4 class="mb-2 mb-md-0">Sales Revenue Analysis</h4>
+
+        <div class="pill-group">
+            <a href="?period=daily" class="{% if selected_period == 'daily' %}active{% endif %}">Daily</a>
+            <a href="?period=weekly" class="{% if selected_period == 'weekly' %}active{% endif %}">Weekly</a>
+            <a href="?period=monthly" class="{% if selected_period == 'monthly' %}active{% endif %}">Monthly</a>
+            <a href="?period=yearly" class="{% if selected_period == 'yearly' %}active{% endif %}">Yearly</a>
+        </div>
+    </div>
+
+    <div style="height:400px">
+        <canvas id="salesChart"></canvas>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="glass-card p-4 h-100">
+            <h5 class="mb-3">Top Selling Products</h5>
+            <table class="table align-middle">
+                <tbody>
+                {% for product in top_products %}
+                    <tr>
+                        <td>{{ product.title }}</td>
+                        <td class="text-end">{{ product.sales_count }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td>No sales data available.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="glass-card p-4 h-100">
+            <h5 class="mb-3">Top Categories</h5>
+            <table class="table align-middle">
+                <tbody>
+                {% for category in top_categories %}
+                    <tr>
+                        <td>{{ category.name }}</td>
+                        <td class="text-end">{{ category.total_sales }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td>No category data available.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="glass-card p-4">
+            <h5 class="mb-3">Top Languages</h5>
+            <table class="table align-middle">
+                <tbody>
+                {% for language in top_languages %}
+                    <tr>
+                        <td>{{ language.name }}</td>
+                        <td class="text-end">{{ language.total_sales }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td>No language data available.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('salesChart');
+
+new Chart(ctx,{
+    type:'line',
+    data:{
+        labels: {{ sales_labels|safe }},
+        datasets:[{
+            label:'Revenue',
+            data: {{ sales_values|safe }},
+            tension:.4,
+            fill:true,
+            borderWidth:3
+        }]
+    },
+    options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+            legend:{display:false},
+            title:{display:true,text:'Sales Revenue Analysis'}
+        },
+        scales:{
+            x:{title:{display:true,text:'Interval'}},
+            y:{
+                beginAtZero:true,
+                title:{display:true,text:'Revenue (₹)'}
+            }
+        }
+    }
+});
+</script>
+
+{% endblock %}
+
+
+
+
+
+
+{% comment %} {% extends 'admin_base.html' %}
 
 {% block content %}
 
 <div class="container py-5">
 
-```
+
 <h1 class="mb-4">
     Admin Dashboard
 </h1>
@@ -565,4 +765,4 @@ new Chart(
 
 </script>
 
-{% endblock %}
+{% endblock %} {% endcomment %}
