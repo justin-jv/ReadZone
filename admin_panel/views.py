@@ -5,7 +5,7 @@ from django.contrib import messages
 from .forms import (AdminLoginForm, CategoryForm, LanguageForm, ProductForm, CouponForm, ProductOfferForm, CategoryOfferForm)
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
-from django.db.models.functions import TruncMonth, Coalesce
+from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYear, Coalesce
 
 from accounts.models import CustomUser
 from store.models import (Category, Language, Product, ProductImage, Order, OrderItem, Wallet, WalletTransaction, Coupon, ProductOffer, CategoryOffer, CouponUsage)
@@ -126,33 +126,135 @@ def admin_dashboard(request):
         )[:10]
     )
 
-    monthly_sales = (
-
-        Order.objects.filter(
-            payment_status='paid'
-        )
-
-        .annotate(
-            month=TruncMonth(
-                'created_at'
-            )
-        )
-
-        .values(
-            'month'
-        )
-
-        .annotate(
-            revenue=Sum(
-                'total_amount'
-            )
-        )
-
-        .order_by(
-            'month'
-        )
-
+    period = request.GET.get(
+        'period',
+        'monthly'
     )
+
+
+    if period == 'daily':
+
+        sales_data = (
+
+            Order.objects.filter(
+                payment_status='paid'
+            )
+
+            .annotate(
+                period=TruncDay(
+                    'created_at'
+                )
+            )
+
+            .values(
+                'period'
+            )
+
+            .annotate(
+                revenue=Sum(
+                    'total_amount'
+                )
+            )
+
+            .order_by(
+                'period'
+            )
+
+        )
+
+    elif period == 'weekly':
+
+        sales_data = (
+
+            Order.objects.filter(
+                payment_status='paid'
+            )
+
+            .annotate(
+                period=TruncWeek(
+                    'created_at'
+                )
+            )
+
+            .values(
+                'period'
+            )
+
+            .annotate(
+                revenue=Sum(
+                    'total_amount'
+                )
+            )
+
+            .order_by(
+                'period'
+            )
+
+        )
+
+
+    elif period == 'yearly':
+
+        sales_data = (
+
+            Order.objects.filter(
+                payment_status='paid'
+            )
+
+            .annotate(
+                period=TruncYear(
+                    'created_at'
+                )
+            )
+
+            .values(
+                'period'
+            )
+
+            .annotate(
+                revenue=Sum(
+                    'total_amount'
+                )
+            )
+
+            .order_by(
+                'period'
+            )
+
+        )
+
+
+    else:
+
+        sales_data = (
+
+            Order.objects.filter(
+                payment_status='paid'
+            )
+
+            .annotate(
+                period=TruncMonth(
+                    'created_at'
+                )
+            )
+
+            .values(
+                'period'
+            )
+
+            .annotate(
+                revenue=Sum(
+                    'total_amount'
+                )
+            )
+
+            .order_by(
+                'period'
+            )
+
+        )
+
+
     
     top_categories = (
 
@@ -229,13 +331,26 @@ def admin_dashboard(request):
 
         'sales_labels': [
 
-            sale['month'].strftime(
-                '%b %Y'
+            (
+
+                sale['period'].strftime('%d %b')
+
+                if period == 'daily'
+                
+                else sale['period'].strftime('Week %W, %Y')
+                if period == 'weekly'
+
+                else sale['period'].strftime('%Y')
+                if period == 'yearly'
+
+                else sale['period'].strftime('%b %Y')
+
             )
 
-            for sale in monthly_sales
+            for sale in sales_data
 
         ],
+
 
         'sales_values': [
 
@@ -243,9 +358,12 @@ def admin_dashboard(request):
                 sale['revenue']
             )
 
-            for sale in monthly_sales
+            for sale in sales_data
 
         ],
+
+
+        'selected_period': period,
 
     }
 

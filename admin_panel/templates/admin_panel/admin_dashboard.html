@@ -416,13 +416,61 @@
 
     <div class="card-body">
 
+        <form method="get" class="mb-3">
+
+            <select
+                name="period"
+                class="form-select w-auto"
+                onchange="this.form.submit()"
+            >
+
+                <option
+                    value="daily"
+                    {% if selected_period == 'daily' %}
+                    selected
+                    {% endif %}
+                >
+                    Daily
+                </option>
+
+                <option
+                    value="weekly"
+                    {% if selected_period == 'weekly' %}
+                    selected
+                    {% endif %}
+                >
+                    Weekly
+                </option>
+
+                <option
+                    value="monthly"
+                    {% if selected_period == 'monthly' %}
+                    selected
+                    {% endif %}
+                >
+                    Monthly
+                </option>
+
+                <option
+                    value="yearly"
+                    {% if selected_period == 'yearly' %}
+                    selected
+                    {% endif %}
+                >
+                    Yearly
+                </option>
+
+            </select>
+
+        </form>
+
         <h4>
             Sales Overview
         </h4>
 
-        <canvas
-            id="salesChart"
-        ></canvas>
+        <div style="height:400px;">
+            <canvas id="salesChart"></canvas>
+        </div>
 
     </div>
 
@@ -467,7 +515,47 @@ new Chart(
 
         options:{
 
-            responsive:true
+            responsive:true,
+
+            maintainAspectRatio:false,
+
+            plugins:{
+
+                legend:{
+                    display:false,
+                    position:'top'
+                },
+
+                title:{
+                    display:true,
+                    text:'Sales Revenue Analysis'
+                }
+
+            },
+
+            scales:{
+
+                x:{
+
+                    title:{
+                        display:true,
+                        text:'Interval'
+                    }
+
+                },
+
+                y:{
+
+                    beginAtZero:true,
+
+                    title:{
+                        display:true,
+                        text:'Revenue (₹)'
+                    }
+
+                }
+
+            }
 
         }
 
