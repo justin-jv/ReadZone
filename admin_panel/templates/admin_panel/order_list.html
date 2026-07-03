@@ -1,6 +1,37 @@
 {% extends 'admin_base.html' %}
 
+{% block extra_css %}
+<style>
+.page-title{font-size:2rem;font-weight:700;}
+.page-subtitle{color:#6b7a74;margin-bottom:2rem;}
+.glass-panel{background:rgba(255,255,255,.72);backdrop-filter:blur(18px);border:1px solid rgba(0,0,0,.06);border-radius:24px;padding:24px;}
+.custom-input{border:none;background:#f4f7f5;border-radius:16px;padding:14px 18px;}
+.custom-input:focus{box-shadow:none;border:1px solid #23473b;background:#fff;}
+.primary-btn,.secondary-btn{border:none;border-radius:16px;padding:14px;transition:.25s;}
+.primary-btn{background:#23473b;color:#fff;}
+.primary-btn:hover{background:#1d3b31;transform:translateY(-3px);}
+.secondary-btn{background:#eef2ef;color:#23473b;}
+.secondary-btn:hover{transform:translateY(-3px);}
+.table-wrapper{overflow:hidden;}
+.table{margin-bottom:0;}
+.table thead th{border:none;color:#6b7a74;font-size:13px;text-transform:uppercase;}
+.table tbody td{vertical-align:middle;border-color:rgba(0,0,0,.05);}
+.table tbody tr:hover{background:rgba(35,71,59,.04);}
+.view-btn{text-decoration:none;background:#23473b;color:#fff;padding:9px 16px;border-radius:999px;font-size:13px;display:inline-block;transition:.25s;}
+.view-btn:hover{color:#fff;transform:translateY(-2px);}
+.status-pill{padding:8px 14px;border-radius:999px;font-size:12px;font-weight:600;}
+.status-pending{background:#fff3cd;color:#856404;}
+.status-completed{background:#d1fae5;color:#065f46;}
+.status-cancelled{background:#fee2e2;color:#991b1b;}
+.status-partially{background:#fed7aa;color:#9a3412;}
+.pagination{gap:8px;}
+.pagination .page-link{border:none;border-radius:14px;background:#eef2ef;color:#23473b;}
+.pagination .active .page-link{background:#23473b;color:#fff;}
+</style>
+{% endblock %}
+
 {% block content %}
+<!-- Full redesigned order management template -->
 
 <div class="container-fluid py-4">
 

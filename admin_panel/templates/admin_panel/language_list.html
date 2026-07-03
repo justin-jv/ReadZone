@@ -1,5 +1,574 @@
 {% extends 'admin_base.html' %}
 
+{% block extra_css %}
+
+<style>
+
+.page-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:16px;
+
+    flex-wrap:wrap;
+
+    margin-bottom:24px;
+
+}
+
+.page-title{
+
+    font-size:2rem;
+
+    font-weight:700;
+
+    margin:0;
+
+}
+
+.page-subtitle{
+
+    color:#6b7a74;
+
+    margin-top:6px;
+
+}
+
+.glass-card{
+
+    background:rgba(255,255,255,.75);
+
+    backdrop-filter:blur(18px);
+
+    border:1px solid rgba(0,0,0,.06);
+
+    border-radius:24px;
+
+    padding:24px;
+
+}
+
+.primary-btn{
+
+    background:#23473b;
+
+    color:#fff;
+
+    text-decoration:none;
+
+    padding:14px 22px;
+
+    border-radius:18px;
+
+    display:inline-flex;
+
+    gap:10px;
+
+    align-items:center;
+
+    transition:.25s;
+
+}
+
+.primary-btn:hover{
+
+    background:#1d3b31;
+
+    color:#fff;
+
+    transform:translateY(-2px);
+
+}
+
+.custom-input{
+
+    border:none;
+
+    background:#f4f7f5;
+
+    border-radius:16px;
+
+    padding:14px 18px;
+
+}
+
+.custom-input:focus{
+
+    box-shadow:none;
+
+    border:1px solid #23473b;
+
+    background:#fff;
+
+}
+
+.search-btn,
+
+.clear-btn{
+
+    border:none;
+
+    border-radius:16px;
+
+    padding:14px;
+
+    transition:.25s;
+
+    text-decoration:none;
+
+    display:block;
+
+    text-align:center;
+
+}
+
+.search-btn{
+
+    background:#23473b;
+
+    color:#fff;
+
+}
+
+.search-btn:hover{
+
+    background:#1d3b31;
+
+    color:#fff;
+
+    transform:translateY(-2px);
+
+}
+
+.clear-btn{
+
+    background:#eef2ef;
+
+    color:#23473b;
+
+}
+
+.clear-btn:hover{
+
+    background:#dfe7e2;
+
+    color:#23473b;
+
+    transform:translateY(-2px);
+
+}
+
+.table{
+
+    margin-bottom:0;
+
+}
+
+.table thead th{
+
+    border:none;
+
+    color:#6b7a74;
+
+    text-transform:uppercase;
+
+    font-size:12px;
+
+    letter-spacing:.6px;
+
+}
+
+.table tbody td{
+
+    vertical-align:middle;
+
+    border-color:rgba(0,0,0,.05);
+
+}
+
+.table tbody tr:hover{
+
+    background:rgba(35,71,59,.04);
+
+}
+
+.status-pill{
+
+    padding:8px 14px;
+
+    border-radius:999px;
+
+    font-size:12px;
+
+    font-weight:600;
+
+}
+
+.active-pill{
+
+    background:#d1fae5;
+
+    color:#065f46;
+
+}
+
+.inactive-pill{
+
+    background:#fee2e2;
+
+    color:#991b1b;
+
+}
+
+.edit-btn,
+
+.activate-btn,
+
+.deactivate-btn{
+
+    text-decoration:none;
+
+    padding:10px 16px;
+
+    border-radius:999px;
+
+    font-size:13px;
+
+    transition:.25s;
+
+    display:inline-block;
+
+}
+
+.edit-btn{
+
+    background:#fef3c7;
+
+    color:#92400e;
+
+}
+
+.edit-btn:hover{
+
+    background:#f59e0b;
+
+    color:#fff;
+
+}
+
+.activate-btn{
+
+    background:#d1fae5;
+
+    color:#065f46;
+
+}
+
+.activate-btn:hover{
+
+    background:#065f46;
+
+    color:#fff;
+
+}
+
+.deactivate-btn{
+
+    background:#fee2e2;
+
+    color:#991b1b;
+
+}
+
+.deactivate-btn:hover{
+
+    background:#991b1b;
+
+    color:#fff;
+
+}
+
+@media(max-width:768px){
+
+    .page-title{
+
+        font-size:1.6rem;
+
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <h1 class="page-title">
+
+            Language Management
+
+        </h1>
+
+        <div class="page-subtitle">
+
+            Manage available languages for your bookstore.
+
+        </div>
+
+    </div>
+
+    <a
+        href="{% url 'add_language' %}"
+        class="primary-btn"
+    >
+
+        <i class="fas fa-plus"></i>
+
+        Add Language
+
+    </a>
+
+</div>
+
+
+<div class="glass-card mb-4">
+
+    <form method="GET" class="row g-3">
+
+        <div class="col-md-5">
+
+            <input
+                type="text"
+                name="search"
+                class="form-control custom-input"
+                placeholder="Search Language"
+                value="{{ search_query }}"
+            >
+
+        </div>
+
+        <div class="col-md-3">
+
+            <select
+                name="status"
+                class="form-select custom-input"
+            >
+
+                <option
+                    value="all"
+                    {% if status_filter == 'all' %}
+                    selected
+                    {% endif %}
+                >
+                    All Languages
+                </option>
+
+                <option
+                    value="active"
+                    {% if status_filter == 'active' %}
+                    selected
+                    {% endif %}
+                >
+                    Active
+                </option>
+
+                <option
+                    value="inactive"
+                    {% if status_filter == 'inactive' %}
+                    selected
+                    {% endif %}
+                >
+                    Inactive
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="col-md-2">
+
+            <button
+                type="submit"
+                class="search-btn w-100"
+            >
+
+                Search
+
+            </button>
+
+        </div>
+
+        <div class="col-md-2">
+
+            <a
+                href="{% url 'language_management' %}"
+                class="clear-btn w-100"
+            >
+
+                Clear
+
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<div class="glass-card">
+
+    <div class="table-responsive">
+
+        <table class="table align-middle">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Language
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Actions
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for language in page_obj %}
+
+                <tr>
+
+                    <td>
+
+                        <strong>
+
+                            {{ language.name }}
+
+                        </strong>
+
+                    </td>
+
+                    <td>
+
+                        {% if language.is_active %}
+
+                        <span class="status-pill active-pill">
+
+                            Active
+
+                        </span>
+
+                        {% else %}
+
+                        <span class="status-pill inactive-pill">
+
+                            Inactive
+
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        <a
+                            href="{% url 'edit_language' language.id %}"
+                            class="edit-btn me-2"
+                        >
+
+                            <i class="fas fa-pen me-1"></i>
+
+                            Edit
+
+                        </a>
+
+                        {% if language.is_active %}
+
+                        <a
+                            href="{% url 'deactivate_language' language.id %}"
+                            class="deactivate-btn"
+                            onclick="return confirm('Deactivate this language?')"
+                        >
+
+                            <i class="fas fa-ban me-1"></i>
+
+                            Deactivate
+
+                        </a>
+
+                        {% else %}
+
+                        <a
+                            href="{% url 'activate_language' language.id %}"
+                            class="activate-btn"
+                            onclick="return confirm('Activate this language?')"
+                        >
+
+                            <i class="fas fa-check me-1"></i>
+
+                            Activate
+
+                        </a>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+
+                    <td
+                        colspan="3"
+                        class="text-center py-4"
+                    >
+
+                        No languages found.
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+
+{% comment %} {% extends 'admin_base.html' %}
+
 {% block content %}
 
 <div class="container py-5">
@@ -195,4 +764,4 @@
 
 </div>
 
-{% endblock %}
+{% endblock %}   {% endcomment %}

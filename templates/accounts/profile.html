@@ -1,5 +1,333 @@
 {% extends 'base.html' %}
 
+{% block extra_css %}
+
+<style>
+
+.profile-card{
+
+    background:rgba(255,255,255,.78);
+
+    backdrop-filter:blur(18px);
+
+    border:none;
+
+    border-radius:28px;
+
+    overflow:hidden;
+
+    box-shadow:0 20px 60px rgba(0,0,0,.08);
+
+}
+
+.profile-banner{
+
+    height:120px;
+
+    background:linear-gradient(
+        135deg,
+        #23473b,
+        #3f6b5a
+    );
+
+}
+
+.profile-content{
+
+    margin-top:-70px;
+
+    padding:0 40px 40px;
+
+}
+
+.profile-image{
+
+    width:140px;
+
+    height:140px;
+
+    object-fit:cover;
+
+    border:5px solid white;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.15);
+
+}
+
+.profile-placeholder{
+
+    font-size:140px;
+
+    color:#d1d5db;
+
+    background:white;
+
+    border-radius:50%;
+
+}
+
+.profile-name{
+
+    font-size:2rem;
+
+    font-weight:700;
+
+    margin-top:20px;
+
+    margin-bottom:0;
+
+}
+
+.profile-info{
+
+    background:#f8faf9;
+
+    border-radius:20px;
+
+    padding:20px 24px;
+
+}
+
+.profile-info p{
+
+    margin-bottom:14px;
+
+    color:#4b5563;
+
+}
+
+.profile-info p:last-child{
+
+    margin-bottom:0;
+
+}
+
+.profile-info strong{
+
+    color:#1f2937;
+
+    min-width:110px;
+
+    display:inline-block;
+
+}
+
+.action-btn{
+
+    border:none;
+
+    border-radius:18px;
+
+    padding:14px 20px;
+
+    text-decoration:none;
+
+    font-weight:500;
+
+    transition:.25s;
+
+    display:block;
+
+    text-align:center;
+
+}
+
+.edit-btn{
+
+    background:#23473b;
+
+    color:white;
+
+}
+
+.edit-btn:hover{
+
+    background:#1d3b31;
+
+    color:white;
+
+    transform:translateY(-2px);
+
+}
+
+.email-btn{
+
+    background:#fef3c7;
+
+    color:#92400e;
+
+}
+
+.email-btn:hover{
+
+    background:#f59e0b;
+
+    color:white;
+
+    transform:translateY(-2px);
+
+}
+
+.address-btn{
+
+    background:#d1fae5;
+
+    color:#065f46;
+
+}
+
+.address-btn:hover{
+
+    background:#065f46;
+
+    color:white;
+
+    transform:translateY(-2px);
+
+}
+
+@media(max-width:768px){
+
+    .profile-content{
+
+        padding:0 20px 30px;
+
+    }
+
+    .profile-name{
+
+        font-size:1.6rem;
+
+    }
+
+    .profile-image{
+
+        width:120px;
+
+        height:120px;
+
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8">
+
+            <div class="profile-card">
+
+                <div class="profile-banner"></div>
+
+                <div class="profile-content">
+
+                    <div class="text-center">
+
+                        {% if user_obj.profile_image %}
+
+                        <img
+                            src="{{ user_obj.profile_image.url }}"
+                            class="rounded-circle profile-image"
+                        >
+
+                        {% else %}
+
+                        <i class="fa-solid fa-user-circle profile-placeholder"></i>
+
+                        {% endif %}
+
+                        <h2 class="profile-name">
+
+                            {{ user_obj.first_name }}
+                            {{ user_obj.last_name }}
+
+                        </h2>
+
+                    </div>
+
+                    <div class="profile-info mt-4">
+
+                        <p>
+
+                            <strong>Email:</strong>
+
+                            {{ user_obj.email }}
+
+                        </p>
+
+                        <p>
+
+                            <strong>Mobile:</strong>
+
+                            {{ user_obj.mobile_number }}
+
+                        </p>
+
+                        <p>
+
+                            <strong>Joined On:</strong>
+
+                            {{ user_obj.created_at|date:"d M Y" }}
+
+                        </p>
+
+                    </div>
+
+                    <div class="d-grid gap-3 mt-4">
+
+                        <a
+                            href="{% url 'edit_profile' %}"
+                            class="action-btn edit-btn"
+                        >
+
+                            Edit Profile
+
+                        </a>
+
+                        <a
+                            href="{% url 'change_email' %}"
+                            class="action-btn email-btn"
+                        >
+
+                            Change Email
+
+                        </a>
+
+                        <a
+                            href="{% url 'addresses' %}"
+                            class="action-btn address-btn"
+                        >
+
+                            Saved Addresses
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% comment %} {% extends 'base.html' %}
+
 {% block content %}
 
 <div class="container py-5">
@@ -90,4 +418,4 @@
 
 </div>
 
-{% endblock %}
+{% endblock %} {% endcomment %}

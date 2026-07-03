@@ -1,4 +1,244 @@
-{% extends 'base.html' %}
+{% extends 'admin_base.html' %}
+
+{% block extra_css %}
+
+<style>
+
+.glass-card{
+
+    background:rgba(255,255,255,.75);
+
+    backdrop-filter:blur(18px);
+
+    border:1px solid rgba(0,0,0,.06);
+
+    border-radius:24px;
+
+    padding:32px;
+
+}
+
+.page-header{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:16px;
+
+    margin-bottom:28px;
+
+}
+
+.back-btn{
+
+    width:46px;
+
+    height:46px;
+
+    border-radius:16px;
+
+    background:#eef2ef;
+
+    color:#23473b;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    text-decoration:none;
+
+    transition:.25s;
+
+    flex-shrink:0;
+
+}
+
+.back-btn:hover{
+
+    background:#23473b;
+
+    color:white;
+
+    transform:translateX(-3px);
+
+}
+
+.page-title{
+
+    font-size:2rem;
+
+    font-weight:700;
+
+    margin:0;
+
+}
+
+.page-subtitle{
+
+    color:#6b7a74;
+
+    margin-top:6px;
+
+}
+
+.glass-card form p{
+
+    margin-bottom:20px;
+
+}
+
+.glass-card label{
+
+    display:block;
+
+    margin-bottom:8px;
+
+    font-weight:600;
+
+    color:#23473b;
+
+}
+
+.glass-card input,
+
+.glass-card select,
+
+.glass-card textarea{
+
+    width:100%;
+
+    border:none;
+
+    background:#f4f7f5;
+
+    border-radius:16px;
+
+    padding:14px 18px;
+
+    transition:.25s;
+
+}
+
+.glass-card input:focus,
+
+.glass-card select:focus,
+
+.glass-card textarea:focus{
+
+    outline:none;
+
+    background:white;
+
+    box-shadow:0 0 0 2px rgba(35,71,59,.15);
+
+}
+
+.save-btn{
+
+    background:#23473b;
+
+    color:white;
+
+    border:none;
+
+    border-radius:18px;
+
+    padding:14px 28px;
+
+    transition:.25s;
+
+}
+
+.save-btn:hover{
+
+    background:#1d3b31;
+
+    transform:translateY(-2px);
+
+}
+
+@media(max-width:768px){
+
+    .page-title{
+
+        font-size:1.6rem;
+
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+
+
+<div class="page-header">
+
+    <a
+        href="{% url 'product_offer_management' %}"
+        class="back-btn"
+    >
+
+        <i class="fas fa-arrow-left"></i>
+
+    </a>
+
+    <div>
+
+        <h1 class="page-title">
+
+            Product Offer
+
+        </h1>
+
+        <div class="page-subtitle">
+
+            Create or update promotional offers for products.
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="glass-card">
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button
+            type="submit"
+            class="save-btn mt-3"
+        >
+
+            Save Offer
+
+        </button>
+
+    </form>
+
+</div>
+
+
+</div>
+
+{% endblock %}
+
+
+
+
+
+{% comment %} {% extends 'base.html' %}
 
 {% block content %}
 
@@ -37,4 +277,4 @@
 
 </div>
 
-{% endblock %}
+{% endblock %} {% endcomment %}

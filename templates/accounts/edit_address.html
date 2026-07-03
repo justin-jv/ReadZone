@@ -1,5 +1,242 @@
 {% extends 'base.html' %}
 
+{% block extra_css %}
+
+<style>
+
+.edit-address-card{
+
+    background:rgba(255,255,255,.8);
+
+    backdrop-filter:blur(18px);
+
+    border:none;
+
+    border-radius:28px;
+
+    box-shadow:0 20px 50px rgba(0,0,0,.08);
+
+}
+
+.back-link{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    color:#6b7280;
+
+    text-decoration:none;
+
+    margin-bottom:24px;
+
+    transition:.25s;
+
+}
+
+.back-link:hover{
+
+    color:#23473b;
+
+    transform:translateX(-3px);
+
+}
+
+.edit-address-card .card-body{
+
+    padding:40px;
+
+}
+
+.edit-address-card h2{
+
+    font-weight:700;
+
+    margin-bottom:32px;
+
+}
+
+.edit-address-card label{
+
+    font-weight:600;
+
+    color:#374151;
+
+    margin-bottom:8px;
+
+}
+
+.edit-address-card input,
+
+.edit-address-card select,
+
+.edit-address-card textarea{
+
+    width:100%;
+
+    border:none;
+
+    background:#f4f7f5;
+
+    border-radius:16px;
+
+    padding:14px 18px;
+
+    transition:.25s;
+
+    margin-top:6px;
+
+}
+
+.edit-address-card input:focus,
+
+.edit-address-card select:focus,
+
+.edit-address-card textarea:focus{
+
+    outline:none;
+
+    background:white;
+
+    box-shadow:0 0 0 2px rgba(35,71,59,.15);
+
+}
+
+.edit-address-card textarea{
+
+    min-height:100px;
+
+    resize:vertical;
+
+}
+
+.alert{
+
+    border:none;
+
+    border-radius:18px;
+
+}
+
+.update-btn{
+
+    background:#23473b;
+
+    border:none;
+
+    border-radius:18px;
+
+    padding:14px;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+.update-btn:hover{
+
+    background:#1d3b31;
+
+    transform:translateY(-2px);
+
+}
+
+@media(max-width:768px){
+
+    .edit-address-card .card-body{
+
+        padding:24px;
+
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container py-5">
+
+    <a
+        href="{% url 'addresses' %}"
+        class="back-link"
+    >
+
+        <i class="fas fa-arrow-left"></i>
+
+        Back to My Addresses
+
+    </a>
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8">
+
+            <div class="edit-address-card">
+
+                <div class="card-body">
+
+                    <h2 class="text-center">
+
+                        Edit Address
+
+                    </h2>
+
+                    {% if messages %}
+
+                        {% for message in messages %}
+
+                        <div class="alert alert-info">
+
+                            {{ message }}
+
+                        </div>
+
+                        {% endfor %}
+
+                    {% endif %}
+
+                    <form method="POST">
+
+                        {% csrf_token %}
+
+                        {{ form.as_p }}
+
+                        <button
+                            type="submit"
+                            class="btn update-btn w-100"
+                        >
+
+                            Update Address
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+
+
+{% comment %} {% extends 'base.html' %}
+
 {% block content %}
 
 <div class="container py-5">
@@ -49,4 +286,4 @@
 
 </div>
 
-{% endblock %}
+{% endblock %} {% endcomment %}

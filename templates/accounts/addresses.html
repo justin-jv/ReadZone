@@ -1,5 +1,514 @@
 {% extends 'base.html' %}
 
+{% block extra_css %}
+
+<style>
+
+.back-link{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    color:#6b7280;
+
+    text-decoration:none;
+
+    margin-bottom:24px;
+
+    transition:.25s;
+
+}
+
+.back-link:hover{
+
+    color:#23473b;
+
+    transform:translateX(-3px);
+
+}
+
+.page-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:16px;
+
+    flex-wrap:wrap;
+
+    margin-bottom:32px;
+
+}
+
+.page-title{
+
+    font-size:2rem;
+
+    font-weight:700;
+
+    margin:0;
+
+}
+
+.page-subtitle{
+
+    color:#6b7280;
+
+    margin-top:6px;
+
+}
+
+.add-btn{
+
+    background:#23473b;
+
+    color:white;
+
+    text-decoration:none;
+
+    padding:14px 22px;
+
+    border-radius:18px;
+
+    transition:.25s;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+}
+
+.add-btn:hover{
+
+    background:#1d3b31;
+
+    color:white;
+
+    transform:translateY(-2px);
+
+}
+
+.address-card{
+
+    background:rgba(255,255,255,.8);
+
+    backdrop-filter:blur(18px);
+
+    border:none;
+
+    border-radius:28px;
+
+    overflow:hidden;
+
+    box-shadow:0 20px 50px rgba(0,0,0,.08);
+
+    height:100%;
+
+    transition:.3s;
+
+}
+
+.address-card:hover{
+
+    transform:translateY(-5px);
+
+}
+
+.address-body{
+
+    padding:28px;
+
+}
+
+.address-title{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    margin-bottom:20px;
+
+}
+
+.default-badge{
+
+    background:#d1fae5;
+
+    color:#065f46;
+
+    padding:6px 12px;
+
+    border-radius:999px;
+
+    font-size:12px;
+
+    font-weight:600;
+
+}
+
+.address-info p{
+
+    margin-bottom:12px;
+
+    color:#4b5563;
+
+}
+
+.address-info strong{
+
+    color:#111827;
+
+}
+
+.address-footer{
+
+    padding:20px 28px;
+
+    border-top:1px solid rgba(0,0,0,.06);
+
+    display:flex;
+
+    gap:10px;
+
+    flex-wrap:wrap;
+
+}
+
+.action-btn{
+
+    text-decoration:none;
+
+    padding:10px 16px;
+
+    border-radius:999px;
+
+    font-size:13px;
+
+    transition:.25s;
+
+}
+
+.edit-btn{
+
+    background:#fef3c7;
+
+    color:#92400e;
+
+}
+
+.edit-btn:hover{
+
+    background:#f59e0b;
+
+    color:white;
+
+}
+
+.delete-btn{
+
+    background:#fee2e2;
+
+    color:#991b1b;
+
+}
+
+.delete-btn:hover{
+
+    background:#991b1b;
+
+    color:white;
+
+}
+
+.default-btn{
+
+    background:#d1fae5;
+
+    color:#065f46;
+
+}
+
+.default-btn:hover{
+
+    background:#065f46;
+
+    color:white;
+
+}
+
+.alert{
+
+    border:none;
+
+    border-radius:18px;
+
+}
+
+.empty-state{
+
+    text-align:center;
+
+    padding:80px 20px;
+
+}
+
+.empty-state h4{
+
+    color:#6b7280;
+
+}
+
+@media(max-width:768px){
+
+    .page-title{
+
+        font-size:1.6rem;
+
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container py-5">
+
+    <a
+        href="{% url 'profile' %}"
+        class="back-link"
+    >
+
+        <i class="fas fa-arrow-left"></i>
+
+        Back to Profile
+
+    </a>
+
+    <div class="page-header">
+
+        <div>
+
+            <h1 class="page-title">
+
+                My Addresses
+
+            </h1>
+
+            <div class="page-subtitle">
+
+                Manage your saved delivery addresses.
+
+            </div>
+
+        </div>
+
+        <a
+            href="{% url 'add_address' %}"
+            class="add-btn"
+        >
+
+            <i class="fas fa-plus"></i>
+
+            Add New Address
+
+        </a>
+
+    </div>
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+        <div class="alert alert-success">
+
+            {{ message }}
+
+        </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+    <div class="row">
+
+        {% for address in address_list %}
+
+        <div class="col-lg-6 mb-4">
+
+            <div class="address-card">
+
+                <div class="address-body">
+
+                    <div class="address-title">
+
+                        <h5 class="mb-0">
+
+                            {{ address.address_label }}
+
+                        </h5>
+
+                        {% if address.is_default %}
+
+                        <span class="default-badge">
+
+                            Default
+
+                        </span>
+
+                        {% endif %}
+
+                    </div>
+
+                    <div class="address-info">
+
+                        <p>
+
+                            <strong>Name:</strong>
+
+                            {{ address.full_name }}
+
+                        </p>
+
+                        <p>
+
+                            <strong>Mobile:</strong>
+
+                            {{ address.mobile_number }}
+
+                        </p>
+
+                        <p>
+
+                            {{ address.house_name }}
+
+                        </p>
+
+                        <p>
+
+                            {{ address.area_street }}
+
+                        </p>
+
+                        {% if address.landmark %}
+
+                        <p>
+
+                            {{ address.landmark }}
+
+                        </p>
+
+                        {% endif %}
+
+                        <p>
+
+                            {{ address.city }},
+                            {{ address.district }},
+                            {{ address.state }}
+
+                        </p>
+
+                        <p>
+
+                            {{ address.country }}
+
+                        </p>
+
+                        <p>
+
+                            {{ address.pincode }}
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="address-footer">
+
+                    <a
+                        href="{% url 'edit_address' address.id %}"
+                        class="action-btn edit-btn"
+                    >
+
+                        <i class="fas fa-pen me-1"></i>
+
+                        Edit
+
+                    </a>
+
+                    <a
+                        href="{% url 'delete_address' address.id %}"
+                        class="action-btn delete-btn"
+                        onclick="return confirm('Delete this address?')"
+                    >
+
+                        <i class="fas fa-trash me-1"></i>
+
+                        Delete
+
+                    </a>
+
+                    {% if not address.is_default %}
+
+                    <a
+                        href="{% url 'set_default_address' address.id %}"
+                        class="action-btn default-btn"
+                    >
+
+                        <i class="fas fa-check me-1"></i>
+
+                        Set Default
+
+                    </a>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% empty %}
+
+        <div class="empty-state">
+
+            <h4>
+
+                No addresses added yet.
+
+            </h4>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+
+
+{% comment %} {% extends 'base.html' %}
+
 {% block content %}
 
 <div class="container py-5">
@@ -143,4 +652,4 @@
 
 </div>
 
-{% endblock %}
+{% endblock %} {% endcomment %}

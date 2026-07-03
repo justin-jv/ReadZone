@@ -1,5 +1,269 @@
 {% extends 'base.html' %}
 
+{% block extra_css %}
+
+<style>
+
+.edit-profile-card{
+
+    background:rgba(255,255,255,.78);
+
+    backdrop-filter:blur(18px);
+
+    border:none;
+
+    border-radius:28px;
+
+    box-shadow:0 20px 60px rgba(0,0,0,.08);
+
+    overflow:hidden;
+
+}
+
+.edit-profile-header{
+
+    background:linear-gradient(
+        135deg,
+        #23473b,
+        #3f6b5a
+    );
+
+    color:white;
+
+    padding:32px;
+
+    text-align:center;
+
+}
+
+.edit-profile-header h2{
+
+    margin:0;
+
+    font-weight:700;
+
+}
+
+.edit-profile-body{
+
+    padding:40px;
+
+}
+
+.form-control,
+
+.form-select,
+
+textarea{
+
+    border:none;
+
+    background:#f4f7f5;
+
+    border-radius:16px;
+
+    padding:14px 18px;
+
+    transition:.25s;
+
+}
+
+.form-control:focus,
+
+.form-select:focus,
+
+textarea:focus{
+
+    box-shadow:none;
+
+    border:1px solid #23473b;
+
+    background:white;
+
+}
+
+label{
+
+    font-weight:600;
+
+    color:#374151;
+
+    margin-bottom:8px;
+
+}
+
+.alert{
+
+    border:none;
+
+    border-radius:16px;
+
+}
+
+.save-btn{
+
+    background:#23473b;
+
+    color:white;
+
+    border:none;
+
+    border-radius:18px;
+
+    padding:14px;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+.save-btn:hover{
+
+    background:#1d3b31;
+
+    transform:translateY(-2px);
+
+}
+
+.back-link{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    color:#6b7280;
+
+    text-decoration:none;
+
+    margin-bottom:24px;
+
+    transition:.25s;
+
+}
+
+.back-link:hover{
+
+    color:#23473b;
+
+}
+
+@media(max-width:768px){
+
+    .edit-profile-body{
+
+        padding:24px;
+
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8">
+
+            <a
+                href="{% url 'profile' %}"
+                class="back-link"
+            >
+
+                <i class="fas fa-arrow-left"></i>
+
+                Back to Profile
+
+            </a>
+
+            <div class="edit-profile-card">
+
+                <div class="edit-profile-header">
+
+                    <h2>
+
+                        Edit Profile
+
+                    </h2>
+
+                </div>
+
+                <div class="edit-profile-body">
+
+                    {% if messages %}
+
+                        {% for message in messages %}
+
+                        <div class="alert alert-success">
+
+                            {{ message }}
+
+                        </div>
+
+                        {% endfor %}
+
+                    {% endif %}
+
+                    <form
+                        method="POST"
+                        enctype="multipart/form-data"
+                    >
+
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+
+                                Email
+
+                            </label>
+
+                            <input
+                                type="email"
+                                value="{{ user_obj.email }}"
+                                class="form-control"
+                                readonly
+                            >
+
+                        </div>
+
+                        {{ form.as_p }}
+
+                        <button
+                            type="submit"
+                            class="save-btn w-100"
+                        >
+
+                            Save Changes
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% comment %} {% extends 'base.html' %}
+
 {% block content %}
 
 <div class="container py-5">
@@ -65,4 +329,4 @@ Edit Profile
 
 </div>
 
-{% endblock %}
+{% endblock %} {% endcomment %}

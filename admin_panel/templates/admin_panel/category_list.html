@@ -1,5 +1,142 @@
 {% extends 'admin_base.html' %}
 
+{% block extra_css %}
+<style>
+    /* Glass card styling to match dashboard */
+    .glass-card {
+        background: rgba(255, 255, 255, .72);
+        backdrop-filter: blur(18px);
+        border: 1px solid rgba(0, 0, 0, .06);
+        border-radius: 24px;
+        padding: 24px;
+    }
+
+    .table-responsive {
+        border-radius: 16px;
+    }
+
+    .table thead {
+        background: #23473b;
+        color: white;
+    }
+
+    .table tbody tr:hover {
+        background: rgba(35, 71, 59, .05);
+    }
+
+    /* Input and Select styling for consistent look */
+    .form-control, .form-select {
+        border-radius: 12px;
+        padding: 10px 16px;
+        border: 1px solid rgba(31, 45, 40, .15);
+    }
+
+    .btn {
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-0">
+    <!-- Header Section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <h1 class="h3 fw-bold mb-0">Category Management</h1>
+        <a href="{% url 'add_category' %}" class="btn btn-success shadow-sm">
+            <i class="fas fa-plus me-2"></i> Add Category
+        </a>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="glass-card mb-4">
+        <form method="GET" class="row g-3">
+            <div class="col-12 col-md-5">
+                <input type="text" name="search" class="form-control" placeholder="Search Category..." value="{{ search_query }}">
+            </div>
+            <div class="col-6 col-md-3">
+                <select name="status" class="form-select">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Categories</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+            <div class="col-3 col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+            </div>
+            <div class="col-3 col-md-2">
+                <a href="{% url 'category_management' %}" class="btn btn-outline-secondary w-100">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table Section -->
+    <div class="glass-card">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Category Name</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in page_obj %}
+                    <tr>
+                        <td class="fw-bold">{{ category.name }}</td>
+                        <td>
+                            {% if category.is_active %}
+                                <span class="badge bg-success-subtle text-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger-subtle text-danger">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ category.created_at|date:"d M Y" }}</td>
+                        <td class="text-end">
+                            <a href="{% url 'edit_category' category.id %}" class="btn btn-sm btn-outline-warning me-2">Edit</a>
+                            {% if category.is_active %}
+                                <a href="{% url 'deactivate_category' category.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Deactivate this category?')">Deactivate</a>
+                            {% else %}
+                                <a href="{% url 'activate_category' category.id %}" class="btn btn-sm btn-outline-success" onclick="return confirm('Activate this category?')">Activate</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4">No categories found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-center align-items-center mt-4 gap-2">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="btn btn-sm btn-outline-primary">First</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-sm btn-outline-primary">Previous</a>
+            {% endif %}
+            
+            <span class="px-3 text-muted small">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn btn-sm btn-outline-primary">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-sm btn-outline-primary">Last</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+
+{% comment %} {% extends 'admin_base.html' %}
+
 {% block content %}
 
 <div class="container py-5">
@@ -258,4 +395,4 @@
 
 </div>
 
-{% endblock %}
+{% endblock %} {% endcomment %}
