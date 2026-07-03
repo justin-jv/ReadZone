@@ -611,6 +611,20 @@ def decrease_quantity(
 
         item.save()
 
+    elif item.quantity == 1:
+        
+        item.quantity -= 1
+        
+        item.delete()
+
+        messages.warning(
+            request,
+            'Item is deleted.'
+        )
+
+
+    
+
     else:
 
         messages.warning(

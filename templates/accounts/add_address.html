@@ -1,3 +1,5 @@
+
+
 {% extends 'base.html' %}
 
 {% block extra_css %}
@@ -206,20 +208,18 @@
 
                         {% csrf_token %}
 
-                        {{ form.as_p }}
+                    {{ form.as_p }}
 
-                        <button
-                            type="submit"
-                            class="btn save-btn w-100"
-                        >
+                    <button
+                        type="submit"
+                        class="btn save-btn w-100"
+                    >
 
-                            Save Address
+                        Save Address
 
-                        </button>
+                    </button>
 
-                    </form>
-
-                </div>
+                </form>
 
             </div>
 
@@ -229,12 +229,17 @@
 
 </div>
 
+</div>
+
 {% endblock %}
 
 
 
 
-{% comment %} {% extends 'base.html' %}
+ 
+{% comment %} 
+ 
+{% extends 'base.html' %}
 
 {% block content %}
 
@@ -285,4 +290,5 @@
 
 </div>
 
-{% endblock %} {% endcomment %}
+{% endblock %} 
+ {% endcomment %}
