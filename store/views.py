@@ -26,6 +26,8 @@ import razorpay
 from decimal import Decimal
 from django.http import JsonResponse
 
+from django.urls import reverse
+
 
 def generate_order_id():
 
@@ -809,8 +811,12 @@ def checkout(request):
         )
 
         return redirect(
-            '/add_address/?next=/checkout/'
+            f"{reverse('add_address')}?next={reverse('checkout')}"
         )
+
+        # return redirect(
+        #     '/add_address/?next=/checkout/'
+        # )
 
     checkout_address_id = (
         request.session.get(
