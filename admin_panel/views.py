@@ -1543,6 +1543,18 @@ def update_order_item_status(
 
         item.save()
 
+        if (
+            status == 'delivered'
+            and item.order.payment_method == 'cod'
+            and item.order.payment_status == 'pending'
+        ):
+
+            item.order.payment_status = 'paid'
+
+            item.order.save(
+                update_fields=['payment_status']
+            )
+
         update_order_status(
             item.order
         )
@@ -1598,28 +1610,30 @@ def approve_return(
 
     item.save()
 
-    wallet, created = Wallet.objects.get_or_create(
-        user=item.order.user
-    )
-
-    refund_amount = (
-        item.price
-        * item.quantity
-    )
-
-    wallet.balance += refund_amount
-
-    wallet.save()
-
-    WalletTransaction.objects.create(
-        wallet=wallet,
-        transaction_type='credit',
-        amount=refund_amount,
-        description=(
-            f"Refund for returned item "
-            f"{item.product_title}"
+    if item.order.payment_status == 'paid':
+        
+        wallet, created = Wallet.objects.get_or_create(
+            user=item.order.user
         )
-    )
+
+        refund_amount = (
+            item.price
+            * item.quantity
+        )
+
+        wallet.balance += refund_amount
+
+        wallet.save()
+
+        WalletTransaction.objects.create(
+            wallet=wallet,
+            transaction_type='credit',
+            amount=refund_amount,
+            description=(
+                f"Refund for returned item "
+                f"{item.product_title}"
+            )
+        )
 
 
 

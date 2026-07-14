@@ -1607,28 +1607,31 @@ def cancel_order_item(
 
     item.save()
 
-    wallet, created = Wallet.objects.get_or_create(
-        user=request.user
-    )
+    if item.order.payment_status == 'paid':
 
-    refund_amount = (
-        item.price
-        * item.quantity
-    )
-
-    wallet.balance += refund_amount
-
-    wallet.save()
-
-    WalletTransaction.objects.create(
-        wallet=wallet,
-        transaction_type='credit',
-        amount=refund_amount,
-        description=(
-            f"Refund for cancelled item "
-            f"{item.product_title}"
+                  
+        wallet, created = Wallet.objects.get_or_create(
+            user=request.user
         )
-    )
+
+        refund_amount = (
+            item.price
+            * item.quantity
+        )
+
+        wallet.balance += refund_amount
+
+        wallet.save()
+
+        WalletTransaction.objects.create(
+            wallet=wallet,
+            transaction_type='credit',
+            amount=refund_amount,
+            description=(
+                f"Refund for cancelled item "
+                f"{item.product_title}"
+            )
+        )
 
     if item.product:
 
@@ -2064,6 +2067,21 @@ def download_invoice(
                 f"{order.get_payment_status_display()}"
             ),
             styles['Normal']
+        )
+
+    )
+
+    elements.append(
+
+        Paragraph(
+
+            (
+                f"<b>Order Status:</b> "
+                f"{order.get_order_status_display()}"
+            ),
+
+            styles['Normal']
+
         )
 
     )
