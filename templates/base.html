@@ -162,7 +162,7 @@ to{opacity:1;transform:none}
 <a class="nav-link position-relative" href="{% url 'cart' %}">
 <i class="fas fa-shopping-cart"></i> Cart
 {% if cart_count %}
-<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill">{{ cart_count }}</span>
+<span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill">{{ cart_count }}</span>
 {% endif %}
 </a>
 </li>

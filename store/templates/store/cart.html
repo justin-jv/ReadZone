@@ -3,6 +3,8 @@
 
 {% block content %}
 
+<div id="cart-message"></div>
+
 <div class="container py-5">
 
     <div class="row">
@@ -19,7 +21,7 @@
 
                 {% for item in items %}
 
-                <div class="card mb-3 shadow-sm">
+                <div class="card mb-3 shadow-sm" id="cart-item-{{ item.id }}">
 
                     <div class="card-body">
 
@@ -83,25 +85,44 @@
                                     justify-content-center"
                                 >
 
-                                    <a
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-secondary cart-action"
+                                        data-item-id="{{ item.id }}"
+                                        data-action="decrease"
+                                    >
+                                    -
+                                    </button>
+
+                                    {% comment %} <a
                                         href="{% url 'decrease_quantity' item.id %}"
                                         class="btn btn-outline-secondary"
                                     >
                                         -
-                                    </a>
-
+                                    </a> {% endcomment %}
+                                    
                                     <span
+                                        id="quantity-{{ item.id }}"
                                         class="mx-3 fw-bold"
                                     >
                                         {{ item.quantity }}
                                     </span>
 
-                                    <a
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-secondary cart-action"
+                                        data-item-id="{{ item.id }}"
+                                        data-action="increase"
+                                    >
+                                    +
+                                    </button>
+
+                                    {% comment %} <a
                                         href="{% url 'increase_quantity' item.id %}"
                                         class="btn btn-outline-secondary"
                                     >
                                         +
-                                    </a>
+                                    </a> {% endcomment %}
 
                                 </div>
 
@@ -109,7 +130,7 @@
 
                             <div class="col-md-2 text-center">
 
-                                <strong>
+                                <strong id="subtotal-{{ item.id }}">
 
                                     ₹{{ item.subtotal }}
 
@@ -119,14 +140,21 @@
 
                             <div class="col-md-1 text-center">
 
-                                <a
+                                <button
+                                    type="button"
+                                    class="btn btn-danger btn-sm cart-action"
+                                    data-item-id="{{ item.id }}"
+                                    data-action="remove"
+                                >
+
+                                {% comment %} <a
                                     href="{% url 'remove_from_cart' item.id %}"
                                     class="btn btn-danger btn-sm"
-                                >
+                                > {% endcomment %}
 
                                     <i class="fas fa-trash"></i>
 
-                                </a>
+                                </a> 
 
                             </div>
 
@@ -189,7 +217,7 @@
 
                         </span>
 
-                        <strong>
+                        <strong id="cart-total" >
 
                             ₹{{ total }}
 
@@ -217,5 +245,185 @@
     </div>
 
 </div>
+
+<script>
+
+function getCookie(name) {
+
+    let cookieValue = null;
+
+    if (document.cookie && document.cookie !== '') {
+
+        const cookies = document.cookie.split(';');
+
+        for (let cookie of cookies) {
+
+            cookie = cookie.trim();
+
+            if (cookie.startsWith(name + '=')) {
+
+                cookieValue = decodeURIComponent(
+                    cookie.substring(name.length + 1)
+                );
+
+                break;
+
+            }
+
+        }
+
+    }
+
+    return cookieValue;
+
+}
+
+const csrftoken = getCookie('csrftoken');
+
+document.addEventListener('click', function(event) {
+
+    const button = event.target.closest('.cart-action');
+
+    if (!button) return;
+
+    const itemId = button.dataset.itemId;
+
+    const action = button.dataset.action;
+
+    fetch("{% url 'update_cart' %}", {
+
+        method: "POST",
+
+        headers: {
+
+            "Content-Type": "application/json",
+
+            "X-CSRFToken": csrftoken
+
+        },
+
+        body: JSON.stringify({
+
+            item_id: itemId,
+
+            action: action
+
+        })
+
+    })
+
+    .then(response => response.json())
+
+    .then(data => {
+
+        const messageBox = document.getElementById("cart-message");
+
+        messageBox.innerHTML = "";
+
+        if (!data.success) {
+
+            messageBox.innerHTML = `
+                <div class="alert alert-warning alert-dismissible fade show">
+                    ${data.message}
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                    </button>
+                </div>
+            `;
+
+            return;
+
+        }
+
+        if (data.removed) {
+
+            document
+                .getElementById(`cart-item-${itemId}`)
+                .remove();
+
+            document
+                .getElementById("cart-total")
+                .textContent = `₹${data.cart_total}`;
+
+            const cartBadge = document.getElementById("cart-count");
+
+            if (data.cart_count > 0) {
+
+                if (cartBadge) {
+
+                    cartBadge.textContent = data.cart_count;
+
+                }
+
+            } else {
+
+                if (cartBadge) {
+
+                    cartBadge.remove();
+
+                }
+
+            }
+
+            if (data.cart_empty) {
+
+                location.reload();
+
+            }
+
+            messageBox.innerHTML = `
+                <div class="alert alert-success alert-dismissible fade show">
+                    ${data.message}
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                    </button>
+                </div>
+            `;
+
+            return;
+
+        }
+
+        document
+            .getElementById(`quantity-${itemId}`)
+            .textContent = data.quantity;
+
+        document
+            .getElementById(`subtotal-${itemId}`)
+            .textContent = `₹${data.subtotal}`;
+
+        document
+            .getElementById("cart-total")
+            .textContent = `₹${data.cart_total}`;
+
+        const cartBadge = document.getElementById("cart-count");
+
+        if (data.cart_count > 0) {
+
+            if (cartBadge) {
+
+                cartBadge.textContent = data.cart_count;
+
+            }
+
+        } else {
+
+            if (cartBadge) {
+
+                cartBadge.remove();
+
+            }
+
+        }
+
+    });
+
+});
+
+</script>
 
 {% endblock %}
