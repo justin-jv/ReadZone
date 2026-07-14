@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 from reportlab.platypus import (SimpleDocTemplate, Spacer, Paragraph, Table, TableStyle)
 
@@ -22,9 +22,10 @@ from reportlab.lib.styles import (getSampleStyleSheet)
 
 from django.conf import settings
 
-import razorpay
+import razorpay, json
 from decimal import Decimal
-from django.http import JsonResponse
+
+from django.views.decorators.http import require_POST
 
 
 def generate_order_id():
@@ -621,6 +622,150 @@ def decrease_quantity(
     return redirect(
         'cart'
     )
+
+# Update Cart Using AJAX
+@login_required
+@require_POST
+def update_cart(request):
+
+    try:
+
+        data = json.loads(request.body)
+
+        item_id = data.get('item_id')
+
+        action = data.get('action')
+
+        item = get_object_or_404(
+            CartItem,
+            id=item_id,
+            cart__user=request.user
+        )
+
+        if action == 'increase':
+
+            if item.quantity >= item.product.stock:
+
+                return JsonResponse({
+
+                    'success': False,
+
+                    'message': (
+                        'Only limited stock is currently available '
+                        'for this book.'
+                    )
+
+                })
+
+            item.quantity += 1
+
+            item.save(
+                update_fields=['quantity']
+            )
+
+        elif action == 'decrease':
+
+            if item.quantity <= 1:
+
+                return JsonResponse({
+
+                    'success': False,
+
+                    'message': 'Minimum quantity is 1.'
+
+                })
+
+            item.quantity -= 1
+
+            item.save(
+                update_fields=['quantity']
+            )
+
+        elif action == 'remove':
+
+            item.delete()
+
+            cart = Cart.objects.get(
+                user=request.user
+            )
+
+            cart_total = sum(
+
+                cart_item.subtotal
+
+                for cart_item in cart.items.all()
+
+            )
+
+            cart_count = cart.items.count()
+
+            return JsonResponse({
+
+                'success': True,
+
+                'removed': True,
+
+                'cart_empty': (
+                    not cart.items.exists()
+                ),
+
+                'cart_total': cart_total,
+
+                'cart_count': cart_count,
+
+                'message': 'Book removed from cart.'
+
+            })
+
+        else:
+
+            return JsonResponse({
+
+                'success': False,
+
+                'message': 'Invalid action.'
+
+            })
+
+        cart = Cart.objects.get(
+            user=request.user
+        )
+
+        cart_total = sum(
+
+            cart_item.subtotal
+
+            for cart_item in cart.items.all()
+
+        )
+
+        cart_count = cart.items.count()
+
+        return JsonResponse({
+
+            'success': True,
+
+            'quantity': item.quantity,
+
+            'subtotal': item.subtotal,
+
+            'cart_total': cart_total,
+
+            'cart_count': cart_count,
+
+            'removed': False
+
+        })
+
+    except Exception as e:
+
+        return JsonResponse({
+
+            'success': False,
+
+            'message': str(e)
+
+        })
 
 @login_required
 def checkout(request):

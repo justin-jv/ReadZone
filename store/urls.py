@@ -13,6 +13,7 @@ urlpatterns = [
     path('cart/remove/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('cart/increase/<int:item_id>/', views.increase_quantity, name='increase_quantity'),
     path('cart/decrease/<int:item_id>/', views.decrease_quantity, name='decrease_quantity'),
+    path('cart/update/', views.update_cart, name='update_cart'),     # AJAX URL
 
     path('checkout/', views.checkout, name='checkout'),
     path('place-order/', views.place_order, name='place_order'),
