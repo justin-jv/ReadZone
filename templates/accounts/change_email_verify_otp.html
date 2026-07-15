@@ -1,5 +1,292 @@
 {% extends 'base.html' %}
 
+{% block extra_css %}
+
+<style>
+
+.otp-card{
+
+    background:rgba(255,255,255,.82);
+
+    backdrop-filter:blur(18px);
+
+    border:none;
+
+    border-radius:22px;
+
+    overflow:hidden;
+
+    box-shadow:0 18px 50px rgba(0,0,0,.08);
+
+}
+
+.otp-banner{
+
+    height:95px;
+
+    background:linear-gradient(
+        135deg,
+        #23473b,
+        #3f6b5a
+    );
+
+}
+
+.otp-content{
+
+    margin-top:-45px;
+
+    padding:0 35px 35px;
+
+}
+
+.otp-icon{
+
+    width:90px;
+
+    height:90px;
+
+    border-radius:50%;
+
+    background:#fff;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    margin:auto;
+
+    font-size:34px;
+
+    color:#23473b;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.15);
+
+}
+
+.page-title{
+
+    font-weight:700;
+
+    color:#23473b;
+
+    margin-top:18px;
+
+    margin-bottom:6px;
+
+}
+
+.page-subtitle{
+
+    color:#6b7280;
+
+    font-size:.95rem;
+
+    margin-bottom:24px;
+
+}
+
+label{
+
+    font-weight:600;
+
+    color:#374151;
+
+    margin-bottom:6px;
+
+}
+
+#id_otp{
+
+    width:100%;
+
+    border-radius:14px !important;
+
+    border:1px solid #d7d7d7 !important;
+
+    padding:13px 16px !important;
+
+    text-align:center;
+
+    font-size:1.2rem;
+
+    letter-spacing:10px;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+#id_otp:focus{
+
+    border-color:#23473b !important;
+
+    box-shadow:0 0 0 .2rem rgba(35,71,59,.12) !important;
+
+}
+
+.verify-btn{
+
+    background:#23473b;
+
+    color:white;
+
+    border:none;
+
+    border-radius:14px;
+
+    padding:13px;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+.verify-btn:hover{
+
+    background:#1d3b31;
+
+    color:white;
+
+    transform:translateY(-2px);
+
+}
+
+.alert{
+
+    border:none;
+
+    border-radius:14px;
+
+}
+
+@media(max-width:768px){
+
+    .otp-content{
+
+        padding:0 20px 25px;
+
+    }
+
+    #id_otp{
+
+        font-size:1rem;
+
+        letter-spacing:6px;
+
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-5 col-md-7">
+
+            <div class="otp-card">
+
+                <div class="otp-banner"></div>
+
+                <div class="otp-content">
+
+                    <div class="text-center">
+
+                        <div class="otp-icon">
+
+                            <i class="fas fa-envelope-open-text"></i>
+
+                        </div>
+
+                        <h3 class="page-title">
+
+                            Verify Email Change
+
+                        </h3>
+
+                        <p class="page-subtitle">
+
+                            Enter the OTP sent to your new email address.
+
+                        </p>
+
+                    </div>
+
+                    {% if messages %}
+
+                        {% for message in messages %}
+
+                            <div class="alert alert-warning">
+
+                                {{ message }}
+
+                            </div>
+
+                        {% endfor %}
+
+                    {% endif %}
+
+                    <form method="POST">
+
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+
+                            {{ form.otp.label_tag }}
+
+                            {{ form.otp }}
+
+                            {% if form.otp.errors %}
+
+                                <div class="text-danger small mt-1">
+
+                                    {{ form.otp.errors }}
+
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="btn verify-btn w-100 mt-2"
+                        >
+
+                            Verify OTP
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+
+
+{% comment %} {% extends 'base.html' %}
+
 {% block content %}
 
 <div class="container py-5">
@@ -43,4 +330,4 @@ Verify Email Change OTP
 </div>
 </div>
 
-{% endblock %}
+{% endblock %} {% endcomment %}

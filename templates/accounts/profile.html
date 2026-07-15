@@ -186,6 +186,24 @@
 
 }
 
+.password-btn{
+
+    background:#e8f1ed;
+
+    color:#23473b;
+
+}
+
+.password-btn:hover{
+
+    background:#23473b;
+
+    color:white;
+
+    transform:translateY(-2px);
+
+}
+
 @media(max-width:768px){
 
     .profile-content{
@@ -298,6 +316,15 @@
                         >
 
                             Change Email
+
+                        </a>
+
+                        <a
+                            href="{% url 'change_password' %}"
+                            class="action-btn password-btn"
+                        >
+
+                            Change Password
 
                         </a>
 

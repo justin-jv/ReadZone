@@ -23,6 +23,22 @@ class CategoryForm(forms.ModelForm):
             'name'
         ]
 
+        widgets = {
+
+            'name': forms.TextInput(
+
+                attrs={
+
+                    'class': 'form-control',
+
+                    'placeholder': 'Enter category name'
+
+                }
+
+            )
+
+        }
+
     def clean_name(self):
 
         name = self.cleaned_data.get(

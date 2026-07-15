@@ -4,6 +4,637 @@
 
 <style>
 
+.edit-card{
+
+    background:rgba(255,255,255,.82);
+
+    backdrop-filter:blur(18px);
+
+    border:none;
+
+    border-radius:22px;
+
+    overflow:hidden;
+
+    box-shadow:0 18px 50px rgba(0,0,0,.08);
+
+}
+
+.edit-banner{
+
+    height:110px;
+
+    background:linear-gradient(
+        135deg,
+        #23473b,
+        #3f6b5a
+    );
+
+}
+
+.edit-content{
+
+    margin-top:-55px;
+
+    padding:0 40px 40px;
+
+}
+
+.profile-preview{
+
+    width:110px;
+
+    height:110px;
+
+    border-radius:50%;
+
+    background:#fff;
+
+    margin:auto;
+
+    overflow:hidden;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.18);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+}
+
+.profile-preview img{
+
+    width:100%;
+
+    height:100%;
+
+    object-fit:cover;
+
+}
+
+.profile-placeholder{
+
+    font-size:72px;
+
+    color:#cbd5e1;
+
+}
+
+.page-title{
+
+    color:#23473b;
+
+    font-weight:700;
+
+    margin-top:18px;
+
+    margin-bottom:6px;
+
+}
+
+.page-subtitle{
+
+    color:#6b7280;
+
+    font-size:.95rem;
+
+    margin-bottom:28px;
+
+}
+
+.back-link{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    width:44px;
+
+    height:44px;
+
+    border-radius:50%;
+
+    background:white;
+
+    color:#23473b;
+
+    text-decoration:none;
+
+    margin-bottom:20px;
+
+    box-shadow:0 6px 18px rgba(0,0,0,.08);
+
+    transition:.25s;
+
+}
+
+.back-link:hover{
+
+    background:#23473b;
+
+    color:white;
+
+    transform:translateY(-2px);
+
+}
+
+label{
+
+    font-weight:600;
+
+    color:#374151;
+
+    margin-bottom:6px;
+
+}
+
+input{
+
+    width:100%;
+
+    border-radius:14px !important;
+
+    border:1px solid #d7d7d7 !important;
+
+    padding:13px 16px !important;
+
+    transition:.25s;
+
+}
+
+input:focus{
+
+    border-color:#23473b !important;
+
+    box-shadow:0 0 0 .2rem rgba(35,71,59,.12) !important;
+
+}
+
+.readonly-box{
+
+    background:#f8faf9 !important;
+
+}
+
+.save-btn{
+
+    background:#23473b;
+
+    color:white;
+
+    border:none;
+
+    border-radius:14px;
+
+    padding:13px;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+.save-btn:hover{
+
+    background:#1d3b31;
+
+    color:white;
+
+    transform:translateY(-2px);
+
+}
+
+.alert{
+
+    border:none;
+
+    border-radius:14px;
+
+}
+
+@media(max-width:768px){
+
+    .edit-content{
+
+        padding:0 22px 28px;
+
+    }
+
+}
+
+.upload-card{
+
+    background:#f8faf9;
+
+    border:2px dashed #cfd8d4;
+
+    border-radius:18px;
+
+    padding:25px;
+
+}
+
+.upload-btn{
+
+    background:#23473b;
+
+    color:white;
+
+    border:none;
+
+    border-radius:14px;
+
+    padding:12px 22px;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+.upload-btn:hover{
+
+    background:#1d3b31;
+
+    color:white;
+
+    transform:translateY(-2px);
+
+}
+
+.upload-text{
+
+    margin-top:14px;
+
+    margin-bottom:0;
+
+    color:#6b7280;
+
+    font-size:.9rem;
+
+}
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+<div class="row justify-content-center">
+
+<div class="col-lg-7">
+
+<a
+href="{% url 'profile' %}"
+class="back-link"
+>
+
+<i class="fas fa-arrow-left"></i>
+
+</a>
+
+<div class="edit-card">
+
+<div class="edit-banner"></div>
+
+<div class="edit-content">
+
+<div class="text-center">
+
+<div class="profile-preview">
+
+{% if user_obj.profile_image %}
+
+<img
+src="{{ user_obj.profile_image.url }}"
+id="previewImage"
+>
+
+{% else %}
+
+<i
+class="fa-solid fa-user-circle profile-placeholder"
+id="previewPlaceholder"
+></i>
+
+<img
+id="previewImage"
+style="display:none;"
+>
+
+{% endif %}
+
+</div>
+
+<h3 class="page-title">
+
+Edit Profile
+
+</h3>
+
+<p class="page-subtitle">
+
+Keep your ReadZone profile information updated.
+
+</p>
+
+</div>
+
+{% if messages %}
+
+{% for message in messages %}
+
+<div class="alert alert-success">
+
+{{ message }}
+
+</div>
+
+{% endfor %}
+
+{% endif %}
+
+<form
+method="POST"
+enctype="multipart/form-data"
+>
+
+{% csrf_token %}
+
+<div class="mb-4">
+
+    <label>
+
+        Email Address
+
+    </label>
+
+    <input
+        type="email"
+        class="form-control readonly-box"
+        value="{{ user_obj.email }}"
+        readonly
+    >
+
+</div>
+
+<div class="row">
+
+    <div class="col-md-6 mb-4">
+
+        <label>
+
+            First Name
+
+        </label>
+
+        {{ form.first_name }}
+
+        {% if form.first_name.errors %}
+
+            <div class="text-danger small mt-1">
+
+                {{ form.first_name.errors }}
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+    <div class="col-md-6 mb-4">
+
+        <label>
+
+            Last Name
+
+        </label>
+
+        {{ form.last_name }}
+
+        {% if form.last_name.errors %}
+
+            <div class="text-danger small mt-1">
+
+                {{ form.last_name.errors }}
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+<div class="mb-4">
+
+    <label>
+
+        Mobile Number
+
+    </label>
+
+    {{ form.mobile_number }}
+
+    {% if form.mobile_number.errors %}
+
+        <div class="text-danger small mt-1">
+
+            {{ form.mobile_number.errors }}
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+<div class="mb-4">
+
+    <label>
+
+        Profile Picture
+
+    </label>
+
+    <div style="display:none;">
+
+        {{ form.profile_image }}
+
+    </div>
+
+    {% comment %} <input
+        type="file"
+        id="id_profile_image"
+        name="profile_image"
+        accept="image/*"
+        hidden
+    > {% endcomment %} 
+
+    <div
+        class="upload-card text-center"
+    >
+
+        <button
+            type="button"
+            id="chooseImageBtn"
+            class="btn upload-btn"
+        >
+
+            <i class="fas fa-camera me-2"></i>
+
+            Change Profile Picture
+
+        </button>
+
+        <p class="upload-text">
+
+            JPG, JPEG or PNG
+
+        </p>
+
+        {% if form.profile_image.errors %}
+
+            <div class="text-danger small mt-2">
+
+                {{ form.profile_image.errors }}
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+<button
+    type="submit"
+    class="btn save-btn w-100"
+>
+
+    <i class="fas fa-save me-2"></i>
+
+    Save Changes
+
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+
+const profileInput =
+    document.getElementById(
+        "id_profile_image"
+    );
+
+const chooseImageBtn =
+    document.getElementById(
+        "chooseImageBtn"
+    );
+
+const previewImage =
+    document.getElementById(
+        "previewImage"
+    );
+
+const previewPlaceholder =
+    document.getElementById(
+        "previewPlaceholder"
+    );
+
+if(profileInput && chooseImageBtn){
+            
+    chooseImageBtn.addEventListener(
+
+        "click",
+
+        function(){
+
+            profileInput.click();
+
+        }
+
+    );
+
+profileInput.addEventListener(
+
+    "change",
+
+    function(e){
+
+        const file =
+            e.target.files[0];
+
+        if(!file){
+
+            return;
+
+        }
+
+        const reader =
+            new FileReader();
+
+        reader.onload = function(event){
+
+            previewImage.src =
+                event.target.result;
+
+            previewImage.style.display =
+                "block";
+
+            if(previewPlaceholder){
+
+                previewPlaceholder.style.display =
+                    "none";
+
+            }
+
+        };
+
+        reader.readAsDataURL(file);
+
+    }
+
+);
+}
+</script>
+
+{% endblock %}
+
+
+
+
+
+
+{% comment %} ---------------------------- {% endcomment %}
+
+{% comment %} 
+
+{% extends 'base.html' %}
+
+{% block extra_css %}
+
+<style>
+
 .edit-profile-card{
 
     background:rgba(255,255,255,.78);
@@ -259,7 +890,16 @@ label{
 
 </div>
 
-{% endblock %}
+{% endblock %} 
+
+
+ {% endcomment %}
+
+
+
+
+
+
 
 
 {% comment %} {% extends 'base.html' %}
