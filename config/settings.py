@@ -18,7 +18,7 @@ DEBUG = config(
     cast=bool
 )
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["13.233.116.106", "readzone.in", "www.readzone.in"]
 
 
 # Application definition
@@ -138,6 +138,8 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = 'media/'
 
